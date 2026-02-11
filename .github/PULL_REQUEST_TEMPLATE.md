@@ -15,7 +15,7 @@
 - [ ] Amélioration
 - [ ] Refactoring
 - [ ] Documentation
-- [ ] Autre : ******\_******
+- [ ] Autre : **\*\***\_**\*\***
 
 ## Changement cassant ?
 
