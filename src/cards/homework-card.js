@@ -1,6 +1,5 @@
 import BasePronoteCard from "./base-card"
 import { localize } from "../localize.js";
-import {unsafeHTML} from 'lit-html/directives/unsafe-html.js';
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
@@ -20,8 +19,6 @@ Date.prototype.getWeekNumber = function () {
 
 class PronoteHomeworkCard extends BasePronoteCard {
 
-    lunchBreakRendered = false;
-
     getFormattedDate(date) {
         return (new Date(date))
             .toLocaleDateString('fr-FR', {weekday: 'long', day: '2-digit', month: '2-digit'})
@@ -31,12 +28,6 @@ class PronoteHomeworkCard extends BasePronoteCard {
 
     getFormattedTime(time) {
         return new Intl.DateTimeFormat("fr-FR", {hour:"numeric", minute:"numeric"}).format(new Date(time));
-    }
-
-    getDayHeader(homework) {
-        return html`<div class="pronote-homework-header">
-            <span>${this.getFormattedDate(homework.date)}</span>
-        </div>`;
     }
 
     getDayHeader(homework, daysCount) {
@@ -106,7 +97,7 @@ class PronoteHomeworkCard extends BasePronoteCard {
                     <span class="homework-subject">${homework.subject}</span>
                 </label>
                 <input type="checkbox" id="homework-${index}" />
-                <span class="homework-description">${unsafeHTML(description)}</span>
+                <span class="homework-description">${description}</span>
                 ${files.length > 0 ? html`<span class="homework-files">${files}</span>` : ''}
             </td>
             <td class="homework-status">

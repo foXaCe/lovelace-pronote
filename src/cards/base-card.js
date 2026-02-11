@@ -16,7 +16,11 @@ class BasePronoteCard extends LitElement {
     }
 
     getCardHeader() {
-        let child_attributes = this.hass.states[this.config.entity].attributes;
+        const stateObj = this.hass.states[this.config.entity];
+        if (!stateObj) {
+            return html``;
+        }
+        let child_attributes = stateObj.attributes;
         let child_name = (typeof child_attributes['nickname'] === 'string' && child_attributes['nickname'].length > 0) ? child_attributes['nickname'] : child_attributes['full_name'];
         return html`<div class="pronote-card-header">${this.header_title} ${child_name}</div>`;
     }
@@ -32,15 +36,16 @@ class BasePronoteCard extends LitElement {
 
         const stateObj = this.hass.states[this.config.entity];
 
-        if (stateObj) {
-
-            return html`
-                <ha-card id="${this.config.entity}-card">
-                    ${this.config.display_header ? this.getCardHeader() : ''}
-                    ${this.getCardContent()}
-                </ha-card>`
-            ;
+        if (!stateObj) {
+            return html``;
         }
+
+        return html`
+            <ha-card id="${this.config.entity}-card">
+                ${this.config.display_header ? this.getCardHeader() : ''}
+                ${this.getCardContent()}
+            </ha-card>`
+        ;
     }
 
     // Définit la configuration de la carte

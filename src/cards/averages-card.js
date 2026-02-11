@@ -30,7 +30,8 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
             return html``;
         }
 
-        let overall_average = this.hass.states[overall_average_entity].state;
+        let stateObj = this.hass.states[overall_average_entity];
+        let overall_average = stateObj.state;
 
         if (!overall_average) {
             return html``;
@@ -39,9 +40,9 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
         let average = parseFloat(overall_average.replace(',', '.'));
         let average_classes = [];
 
-        if (this.config.compare_with_ratio !== null) {
+        if (this.config.compare_with_ratio !== null && stateObj.attributes?.out_of) {
             let comparison_ratio = parseFloat(this.config.compare_with_ratio);
-            let average_ratio = average / parseFloat(overall_average.out_of.replace(',', '.'));
+            let average_ratio = average / parseFloat(stateObj.attributes.out_of.replace(',', '.'));
             average_classes.push(average_ratio >= comparison_ratio ? 'above-ratio' : 'below-ratio');
         }
 

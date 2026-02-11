@@ -144,10 +144,13 @@ class PronoteTimetableCard extends BasePronoteCard {
 
         const stateObj = this.hass.states[this.config.entity];
 
-        const lessons = this.hass.states[this.config.entity].attributes['lessons']
+        if (!stateObj) {
+            return html``;
+        }
 
-        if (stateObj) {
-            this.lunchBreakRendered = false;
+        const lessons = stateObj.attributes['lessons'] || [];
+
+        this.lunchBreakRendered = false;
             const currentWeekNumber = new Date().getWeekNumber();
 
             const itemTemplates = [];
@@ -233,7 +236,6 @@ class PronoteTimetableCard extends BasePronoteCard {
                     ${itemTemplates}
                 </ha-card>`
             ;
-        }
     }
 
     setConfig(config) {

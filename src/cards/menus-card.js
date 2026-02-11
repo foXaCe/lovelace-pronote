@@ -137,10 +137,13 @@ class PronoteMenusCard extends BasePronoteCard {
 
         const stateObj = this.hass.states[this.config.entity];
 
-        const menus = this.hass.states[this.config.entity].attributes['menus']
+        if (!stateObj) {
+            return html``;
+        }
 
-        if (stateObj) {
-            const currentWeekNumber = new Date().getWeekNumber();
+        const menus = stateObj.attributes['menus'] || [];
+
+        const currentWeekNumber = new Date().getWeekNumber();
 
             const itemTemplates = [];
             let daysCount = 0;
@@ -186,7 +189,6 @@ class PronoteMenusCard extends BasePronoteCard {
                     ${itemTemplates}
                 </ha-card>`
             ;
-        }
     }
 
     setConfig(config) {
