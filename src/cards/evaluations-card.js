@@ -176,7 +176,7 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
         }
         .evaluation-comment {
             display: block;
-        }		
+        }
         .evaluation-date + .evaluation-coefficient:before {
             content: ' - '
         }
@@ -193,7 +193,7 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
             border-radius:50%;
             border: solid 0.02em rgba(0, 0, 0, 0.5);
             margin-left: 4px;
-            vertical-align: middle; 
+            vertical-align: middle;
             color: white;
             content: '+';
             text-align:center;
