@@ -25,7 +25,7 @@ class BasePronoteCardEditor extends LitElement {
         } else {
             _config[ev.target.configValue] = ev.target.value == '' ? null : ev.target.value;
         }
-        
+
         this._config = _config;
 
         const event = new CustomEvent("config-changed", {
@@ -47,7 +47,7 @@ class BasePronoteCardEditor extends LitElement {
             <ha-select
                 label="${label}"
                 .value=${value || default_value}
-                .configValue=${config_key}                
+                .configValue=${config_key}
                 @change=${this._valueChanged}
                 @closed=${(ev) => ev.stopPropagation()}
             >
@@ -97,7 +97,7 @@ class BasePronoteCardEditor extends LitElement {
             <ha-textfield type="number" step="${step || 1}"
                  label="${label}"
                 .value=${value || default_value}
-                .configValue=${config_key}                
+                .configValue=${config_key}
                 @change=${this._valueChanged}
             >
         `;
@@ -108,7 +108,7 @@ class BasePronoteCardEditor extends LitElement {
             <ha-textfield
                  label="${label}"
                 .value=${value || default_value}
-                .configValue=${config_key}                
+                .configValue=${config_key}
                 @change=${this._valueChanged}
                 @keyup=${this._valueChanged}
             >
