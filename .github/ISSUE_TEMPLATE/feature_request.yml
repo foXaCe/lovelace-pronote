@@ -1,0 +1,52 @@
+name: Demande de fonctionnalité
+about: Suggérer une nouvelle idée ou amélioration
+title: "[Feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Décris la fonctionnalité souhaitée
+      placeholder: |
+        J'aimerais que les cartes Pronote puissent...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Cas d'utilisation
+      description: Dans quel contexte cette fonctionnalité serait-elle utile ?
+      placeholder: |
+        Cette fonctionnalité me permettrait de...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: As-tu une idée de comment implémenter cette fonctionnalité ?
+      placeholder: |
+        On pourrait ajouter un paramètre... qui permettrait de...
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considérées
+      description: As-tu envisagé d'autres approches ?
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Informations complémentaires
+      description: Tout autre détail ou capture d'écran
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Vérifications
+      options:
+        - label: J'ai cherché dans les issues existantes
+          required: true

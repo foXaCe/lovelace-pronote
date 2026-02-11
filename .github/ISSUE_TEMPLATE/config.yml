@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/delphiki/lovelace-pronote#readme
+    about: Consulter la documentation du projet
+  - name: Discussions
+    url: https://github.com/delphiki/lovelace-pronote/discussions
+    about: Poser une question ou discuter d'idées
