@@ -71,7 +71,7 @@
     "home-assistant-js-websocket": "^8.2.0",
     "lit": "^2.7.6",
     "lit-element": "^3.3.2",
-    "lit-html": "^2.7.5",
+    "lit-html": "^3.3.2",
     "memoize-one": "^6.0.0"
   }
 }
