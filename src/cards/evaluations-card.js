@@ -57,9 +57,11 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
             acquisitionsRows.push(this.getAcquisitionRow(acquisitions[i]));
         }
 
+        const backgroundColor = lesson_background_color || 'grey';
+
         return html`
         <tr class="evaluation-row">
-            <td class="evaluation-color"><span style="background-color:${lesson_background_color}"></span></td>
+            <td class="evaluation-color"><span style="background-color:${backgroundColor}"></span></td>
             <td class="evaluation-description">
                 <label for="evaluation-full-detail-${index}">
                     <span class="evaluation-subject">${evaluation.subject}</span>
@@ -210,7 +212,7 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
             background-color: #45B851;
         }
         .acquisition-icon-B {
-            background-color: ;
+            background-color: #C6C6C6;
         }
         .acquisition-icon-C {
             background-color: #FFDA01;

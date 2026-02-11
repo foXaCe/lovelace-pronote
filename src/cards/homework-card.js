@@ -10,12 +10,12 @@ const css = LitElement.prototype.css;
 const getCardName = () => localize("cards.homework.name");
 const getCardDescription = () => localize("cards.homework.description");
 
-Date.prototype.getWeekNumber = function () {
-    var d = new Date(+this);
+function getWeekNumber(date) {
+    var d = new Date(+date);
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     return Math.ceil((((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7) + 1) / 7);
-};
+}
 
 class PronoteHomeworkCard extends BasePronoteCard {
 
@@ -125,7 +125,7 @@ class PronoteHomeworkCard extends BasePronoteCard {
         const homework = this.hass.states[this.config.entity].attributes['homework'];
 
         if (stateObj) {
-            const currentWeekNumber = new Date().getWeekNumber();
+            const currentWeekNumber = getWeekNumber(new Date());
             const itemTemplates = [];
             let dayTemplates = [];
             let daysCount = 0;
@@ -152,7 +152,7 @@ class PronoteHomeworkCard extends BasePronoteCard {
                         daysCount++;
                     }
 
-                    if (this.config.current_week_only && new Date(hw.date).getWeekNumber() !== currentWeekNumber) {
+                    if (this.config.current_week_only && getWeekNumber(new Date(hw.date)) !== currentWeekNumber) {
                         break;
                     }
 
@@ -162,7 +162,7 @@ class PronoteHomeworkCard extends BasePronoteCard {
                 // if there are homework for the day and not limit on the current week or limit and current week
                 if (dayTemplates.length > 0 && (
                     !this.config.current_week_only
-                    || (this.config.current_week_only && currentWeekNumber === new Date(homework[homework.length-1].date).getWeekNumber())
+                    || (this.config.current_week_only && currentWeekNumber === getWeekNumber(new Date(homework[homework.length-1].date)))
                 )) {
                     itemTemplates.push(this.getDayRow(homework[homework.length-1], dayTemplates, daysCount));
                 }
@@ -280,7 +280,7 @@ class PronoteHomeworkCard extends BasePronoteCard {
             width: 5%;
         }
         .reduce-done .homework-done label:hover {
-            cusor: pointer;
+            cursor: pointer;
         }
         .reduce-done .homework-done .homework-description {
             display: none;

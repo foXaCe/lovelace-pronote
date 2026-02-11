@@ -76,7 +76,8 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
     }
 
     getActivePeriods() {
-        return this.getActivePeriodsSensor().attributes['periods'];
+        const sensor = this.getActivePeriodsSensor();
+        return sensor?.attributes?.periods || [];
     }
 
     getAllEntityNames() {

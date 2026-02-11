@@ -11,12 +11,12 @@ const css = LitElement.prototype.css;
 const getCardName = () => localize("cards.menus.name", "Pronote Menus Card", { language: navigator.language?.split('-')[0] });
 const getCardDescription = () => localize("cards.menus.description", "Display the menus from Pronote", { language: navigator.language?.split('-')[0] });
 
-Date.prototype.getWeekNumber = function () {
-    var d = new Date(+this);
+function getWeekNumber(date) {
+    var d = new Date(+date);
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     return Math.ceil((((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7) + 1) / 7);
-};
+}
 
 function isSameDay(d1, d2) {
     return d1.getFullYear() === d2.getFullYear() &&
@@ -143,7 +143,7 @@ class PronoteMenusCard extends BasePronoteCard {
 
         const menus = stateObj.attributes['menus'] || [];
 
-        const currentWeekNumber = new Date().getWeekNumber();
+        const currentWeekNumber = getWeekNumber(new Date());
 
             const itemTemplates = [];
             let daysCount = 0;
@@ -164,7 +164,7 @@ class PronoteMenusCard extends BasePronoteCard {
                 }
 
                 if (this.config.current_week_only) {
-                    if (new Date(menu.date).getWeekNumber() > currentWeekNumber) {
+                    if (getWeekNumber(new Date(menu.date)) > currentWeekNumber) {
                         break;
                     }
                 }

@@ -10,12 +10,12 @@ const css = LitElement.prototype.css;
 const getCardName = () => localize("cards.timetable.name");
 const getCardDescription = () => localize("cards.timetable.description");
 
-Date.prototype.getWeekNumber = function () {
-    var d = new Date(+this);
+function getWeekNumber(date) {
+    var d = new Date(+date);
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     return Math.ceil((((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7) + 1) / 7);
-};
+}
 
 function isSameDay(d1, d2) {
     return d1.getFullYear() === d2.getFullYear() &&
@@ -151,7 +151,7 @@ class PronoteTimetableCard extends BasePronoteCard {
         const lessons = stateObj.attributes['lessons'] || [];
 
         this.lunchBreakRendered = false;
-            const currentWeekNumber = new Date().getWeekNumber();
+            const currentWeekNumber = getWeekNumber(new Date());
 
             const itemTemplates = [];
             let dayTemplates = [];
@@ -183,7 +183,7 @@ class PronoteTimetableCard extends BasePronoteCard {
                 }
 
                 if (this.config.current_week_only) {
-                    if (new Date(lesson.start_at).getWeekNumber() > currentWeekNumber) {
+                    if (getWeekNumber(new Date(lesson.start_at)) > currentWeekNumber) {
                         break;
                     }
                 }
