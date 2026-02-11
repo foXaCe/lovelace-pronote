@@ -4,7 +4,29 @@ module.exports = {
     '@semantic-release/commit-analyzer',
     '@semantic-release/release-notes-generator',
     '@semantic-release/changelog',
-    '@semantic-release/git',
-    '@semantic-release/github',
+    [
+      '@semantic-release/exec',
+      {
+        prepareCmd: 'yarn build',
+      },
+    ],
+    [
+      '@semantic-release/git',
+      {
+        assets: ['CHANGELOG.md', 'package.json', 'hacs.json'],
+        message: 'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
+      },
+    ],
+    [
+      '@semantic-release/github',
+      {
+        assets: [
+          {
+            path: 'dist/pronote.js',
+            label: 'Pronote Card Bundle',
+          },
+        ],
+      },
+    ],
   ],
 };
