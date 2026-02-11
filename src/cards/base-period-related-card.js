@@ -34,8 +34,8 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
             tabs.push(
                 html`<input
                         type="radio"
-                        name="pronote-period-switcher" 
-                        id="pronote-period-switcher-${period.id}" 
+                        name="pronote-period-switcher"
+                        id="pronote-period-switcher-${period.id}"
                         value="${period.id}"
                         .checked="${this.period_filter === period.id}"
                         @change="${(e) => this.handlePeriodChange(e)}"
