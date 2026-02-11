@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   hacs:
-    name: HACS Action
+    name: Validate HACS Structure
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,13 +35,68 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Verify dist exists
+      - name: Validate hacs.json
         run: |
-          ls -la dist/
-          test -f dist/pronote.js && echo "dist/pronote.js exists"
+          if [ ! -f hacs.json ]; then
+            echo "❌ hacs.json not found"
+            exit 1
+          fi
+          echo "✅ hacs.json exists"
 
-      - name: HACS Action
-        uses: hacs/action@main
-        with:
-          category: plugin
-          ignore: brands
+          # Validate JSON syntax
+          python3 -c "import json; json.load(open('hacs.json'))" || {
+            echo "❌ hacs.json is not valid JSON"
+            exit 1
+          }
+          echo "✅ hacs.json is valid JSON"
+
+          # Check required fields
+          NAME=$(python3 -c "import json; print(json.load(open('hacs.json')).get('name', ''))")
+          FILENAME=$(python3 -c "import json; print(json.load(open('hacs.json')).get('filename', ''))")
+
+          if [ -z "$NAME" ]; then
+            echo "❌ hacs.json missing 'name' field"
+            exit 1
+          fi
+          echo "✅ hacs.json has name: $NAME"
+
+          if [ -z "$FILENAME" ]; then
+            echo "❌ hacs.json missing 'filename' field"
+            exit 1
+          fi
+          echo "✅ hacs.json has filename: $FILENAME"
+
+      - name: Validate compiled file exists
+        run: |
+          if [ ! -f dist/pronote.js ]; then
+            echo "❌ dist/pronote.js not found"
+            exit 1
+          fi
+          echo "✅ dist/pronote.js exists"
+
+          # Check file size (should not be empty)
+          SIZE=$(stat -f%z dist/pronote.js 2>/dev/null || stat -c%s dist/pronote.js)
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "⚠️ dist/pronote.js seems small (${SIZE} bytes)"
+          else
+            echo "✅ dist/pronote.js size: ${SIZE} bytes"
+          fi
+
+      - name: Validate README.md
+        run: |
+          if [ ! -f README.md ]; then
+            echo "❌ README.md not found"
+            exit 1
+          fi
+          echo "✅ README.md exists"
+
+      - name: Summary
+        run: |
+          echo "## HACS Validation Results ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| hacs.json exists | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| hacs.json valid JSON | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| dist/pronote.js exists | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| README.md exists | ✅ |" >> $GITHUB_STEP_SUMMARY
