@@ -1,10 +1,14 @@
 import BasePronoteCard from "./base-card"
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
 );
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
+
+const getCardName = () => localize("cards.timetable.name");
+const getCardDescription = () => localize("cards.timetable.description");
 
 Date.prototype.getWeekNumber = function () {
     var d = new Date(+this);
@@ -370,7 +374,7 @@ customElements.define("pronote-timetable-card", PronoteTimetableCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "pronote-timetable-card",
-    name: "Pronote Timetable Card",
-    description: "Display the timetable from Pronote",
+    name: getCardName(),
+    description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#timetable",
 });

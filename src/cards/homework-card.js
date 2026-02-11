@@ -1,4 +1,5 @@
 import BasePronoteCard from "./base-card"
+import { localize } from "../localize.js";
 import {unsafeHTML} from 'lit-html/directives/unsafe-html.js';
 
 const LitElement = Object.getPrototypeOf(
@@ -6,6 +7,9 @@ const LitElement = Object.getPrototypeOf(
 );
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
+
+const getCardName = () => localize("cards.homework.name");
+const getCardDescription = () => localize("cards.homework.description");
 
 Date.prototype.getWeekNumber = function () {
     var d = new Date(+this);
@@ -319,7 +323,7 @@ customElements.define("pronote-homework-card", PronoteHomeworkCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "pronote-homework-card",
-    name: "Pronote Homework Card",
-    description: "Display the homework from Pronote",
+    name: getCardName(),
+    description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#homework",
 });

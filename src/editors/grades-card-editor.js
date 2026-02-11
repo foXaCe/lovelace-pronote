@@ -1,4 +1,5 @@
 import BasePronoteCardEditor from "./base-editor";
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
@@ -19,7 +20,7 @@ class PronoteGradesCardEditor extends BasePronoteCardEditor {
             ${this.buildSwitchField('Display comment', 'display_comment', this._config.display_comment)}
             ${this.buildSwitchField('Display class average', 'display_class_average', this._config.display_class_average)}
             ${this.buildSwitchField('Compare with class average', 'compare_with_class_average', this._config.compare_with_class_average)}
-            ${this.buildSelectField('Grade format', 'grade_format', [{value: 'full', label: 'Full'}, {value: 'short', label: 'Short'}], this._config.grade_format)}
+            ${this.buildSelectField(localize('editor.fields.grade_format', 'Grade format', this.hass), 'grade_format', [{value: 'full', label: localize('editor.labels.full', 'Full', this.hass)}, {value: 'short', label: localize('editor.labels.short', 'Short', this.hass)}], this._config.grade_format)}
             ${this.buildSwitchField('Display coefficient', 'display_coefficient', this._config.display_coefficient)}
             ${this.buildSwitchField('Display class min', 'display_class_min', this._config.display_class_min)}
             ${this.buildSwitchField('Display class max', 'display_class_max', this._config.display_class_max)}

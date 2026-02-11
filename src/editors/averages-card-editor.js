@@ -1,4 +1,5 @@
 import BasePronoteCardEditor from "./base-editor";
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
@@ -15,7 +16,7 @@ class PronoteAveragesCardEditor extends BasePronoteCardEditor {
         return html`
             ${this.buildEntityPickerField('Averages entity', 'entity', this._config.entity, 'averages')}
             ${this.buildSwitchField('Display header', 'display_header', this._config.display_header)}
-            ${this.buildSelectField('Average format', 'average_format', [{value: 'full', label: 'Full'}, {value: 'short', label: 'Short'}],this._config.average_format)}
+            ${this.buildSelectField(localize('editor.fields.average_format', 'Average format', this.hass), 'average_format', [{value: 'full', label: localize('editor.labels.full', 'Full', this.hass)}, {value: 'short', label: localize('editor.labels.short', 'Short', this.hass)}], this._config.average_format)}
             ${this.buildSwitchField('Display class average', 'display_class_average', this._config.display_class_average)}
             ${this.buildSwitchField('Compare with class average', 'compare_with_class_average', this._config.compare_with_class_average)}
             ${this.buildTextField('Compare with ratio', 'compare_with_ratio', this._config.compare_with_ratio, '')}

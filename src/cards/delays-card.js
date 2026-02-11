@@ -1,10 +1,14 @@
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
 );
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
+
+const getCardName = () => localize("cards.delays.name");
+const getCardDescription = () => localize("cards.delays.description");
 
 class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
 
@@ -171,7 +175,7 @@ customElements.define("pronote-delays-card", PronoteDelaysCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "pronote-delays-card",
-    name: "Pronote Delays Card",
-    description: "Display the delays from Pronote",
+    name: getCardName(),
+    description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#delays",
 });

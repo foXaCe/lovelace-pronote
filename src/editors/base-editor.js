@@ -1,3 +1,5 @@
+import { localize } from "../localize.js";
+
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
 );
@@ -65,9 +67,9 @@ class BasePronoteCardEditor extends LitElement {
 
         let options = [];
         if (allow_all_periods) {
-            options.push({value:'all', label: 'All'});
+            options.push({value:'all', label: localize('editor.labels.all', 'All', this.hass)});
         }
-        options.push({value:'current', label: 'Current'});
+        options.push({value:'current', label: localize('editor.labels.current', 'Current', this.hass)});
         for (let period of active_periods) {
             options.push({value: period.id, label: period.name});
         }

@@ -1,10 +1,14 @@
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
 );
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
+
+const getCardName = () => localize("cards.absences.name");
+const getCardDescription = () => localize("cards.absences.description");
 
 class PronoteAbsencesCard extends BasePeriodRelatedPronoteCard {
 
@@ -144,7 +148,7 @@ customElements.define("pronote-absences-card", PronoteAbsencesCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "pronote-absences-card",
-    name: "Pronote Absences Card",
-    description: "Display the absences from Pronote",
+    name: getCardName(),
+    description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#absences",
 });

@@ -1,10 +1,15 @@
 import BasePronoteCard from "./base-card"
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
 );
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
+
+// Detect language for card registration
+const getCardName = () => localize("cards.menus.name", "Pronote Menus Card", { language: navigator.language?.split('-')[0] });
+const getCardDescription = () => localize("cards.menus.description", "Display the menus from Pronote", { language: navigator.language?.split('-')[0] });
 
 Date.prototype.getWeekNumber = function () {
     var d = new Date(+this);
@@ -292,7 +297,7 @@ customElements.define("pronote-menus-card", PronoteMenusCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "pronote-menus-card",
-    name: "Pronote Menus Card",
-    description: "Display the menus from Pronote",
+    name: getCardName(),
+    description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#menus",
 });

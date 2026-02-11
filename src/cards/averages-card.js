@@ -1,10 +1,14 @@
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
 );
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
+
+const getCardName = () => localize("cards.averages.name");
+const getCardDescription = () => localize("cards.averages.description");
 
 class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
 
@@ -251,7 +255,7 @@ customElements.define("pronote-averages-card", PronoteAveragesCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "pronote-averages-card",
-    name: "Pronote Averages Card",
-    description: "Display the averages from Pronote",
+    name: getCardName(),
+    description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#averages",
 });

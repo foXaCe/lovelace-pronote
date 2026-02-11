@@ -1,4 +1,5 @@
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
+import { localize } from "../localize.js";
 
 const LitElement = Object.getPrototypeOf(
     customElements.get("ha-panel-lovelace")
@@ -6,6 +7,9 @@ const LitElement = Object.getPrototypeOf(
 
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
+
+const getCardName = () => localize("cards.grades.name");
+const getCardDescription = () => localize("cards.grades.description");
 
 class PronoteGradesCard extends BasePeriodRelatedPronoteCard {
 
@@ -228,7 +232,7 @@ customElements.define("pronote-grades-card", PronoteGradesCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "pronote-grades-card",
-    name: "Pronote Grades Card",
-    description: "Display the grades from Pronote",
+    name: getCardName(),
+    description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#grades",
 });
