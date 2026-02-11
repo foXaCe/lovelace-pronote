@@ -35,7 +35,13 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Verify dist exists
+        run: |
+          ls -la dist/
+          test -f dist/pronote.js && echo "dist/pronote.js exists"
+
       - name: HACS Action
         uses: hacs/action@main
         with:
           category: plugin
+          ignore: brands
