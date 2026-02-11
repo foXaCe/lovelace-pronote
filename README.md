@@ -7,15 +7,15 @@ A few cards to help display informations from the [Pronote integration for Home 
 ### Using HACS
 
 Add this repository to HACS : https://github.com/delphiki/lovelace-pronote.git
-then:  
+then:
 HACS > Lovelace > **Pronote Cards**
 
 ## Cards
 
 ### Timetable
-  
-![Timetable card example](/doc/images/timetable-card.png "Timetable card example").  
-  
+
+![Timetable card example](/doc/images/timetable-card.png "Timetable card example").
+
 ```yaml
 type: custom:pronote-timetable-card
 entity: sensor.pronote_XXXX_YYYY_timetable_next_day
@@ -32,9 +32,9 @@ current_week_only: false
 This card can be used with all timetable sensors.
 
 ### Homework
-  
+
 ![Homework card example](/doc/images/homework-card.png "Homework card example").
-  
+
 ```yaml
 type: custom:pronote-homework-card
 entity: sensor.pronote_XXXX_YYYY_homework
@@ -47,9 +47,9 @@ current_week_only: false
 This card can be used with all homework sensors.
 
 ### Grades
-  
+
 ![Grades card example](/doc/images/grades-card.png "Grades card example").
-  
+
 ```yaml
 type: custom:pronote-grades-card
 entity: sensor.pronote_XXXX_YYYY_grades
@@ -68,9 +68,9 @@ max_grades: null
 ```
 
 ### Averages
-  
+
 ![Averages card example](/doc/images/averages-card.png "Averages card example").
-  
+
 ```yaml
 type: custom:pronote-averages-card
 entity: sensor.pronote_XXXX_YYYY_averages
@@ -84,9 +84,9 @@ display_class_max: true
 ```
 
 ### Evaluations
-  
+
 ![Evaluations card example](/doc/images/evaluations-card.png "Evaluations card example").
-  
+
 ```yaml
 type: custom:pronote-evaluations-card
 entity: sensor.pronote_XXXX_YYYY_evaluations
@@ -101,9 +101,9 @@ child_name: null
 ```
 
 ### Absences
-  
+
 ![Absences card example](/doc/images/absences-card.png "Absences card example").
-  
+
 ```yaml
 type: custom:pronote-absences-card
 entity: sensor.pronote_XXXX_YYYY_absences
@@ -113,9 +113,9 @@ child_name: null
 ```
 
 ### Delays
-  
+
 ![Absences card example](/doc/images/delays-card.png "Delays card example").
-  
+
 ```yaml
 type: custom:pronote-delays-card
 entity: sensor.pronote_XXXX_YYYY_delays
