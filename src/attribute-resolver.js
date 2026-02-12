@@ -38,6 +38,11 @@ const ENTITY_SUFFIX_MAPPING = {
     'current_period': 'periode_en_cours',
     'active_periods': 'periodes_actives',
     'previous_periods': 'periodes_precedentes',
+    'overall_average': 'moyenne_generale',
+    'timetable_period': 'emploi_du_temps_de_la_periode',
+    'timetable_today': 'emploi_du_temps_aujourd_hui',
+    'timetable_tomorrow': 'emploi_du_temps_demain',
+    'timetable_next_day': 'emploi_du_temps_prochain_jour',
 };
 
 /**
@@ -137,6 +142,10 @@ export function buildRelatedEntityId(baseEntity, targetEnglishSuffix) {
     for (const [en, fr] of Object.entries(ENTITY_SUFFIX_MAPPING)) {
         if (baseEntity.endsWith(`_${en}`)) {
             basePrefix = baseEntity.slice(0, -(en.length + 1));
+            // Quand en === fr (absences, evaluations, menus), on ne peut pas
+            // déterminer la langue depuis le suffixe seul. On défaut au français
+            // car c'est la convention actuelle de l'intégration Pronote.
+            isFrench = (en === fr);
             break;
         }
         if (en !== fr && baseEntity.endsWith(`_${fr}`)) {

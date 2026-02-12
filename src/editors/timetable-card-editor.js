@@ -11,7 +11,7 @@ class PronoteTimetableCardEditor extends BasePronoteCardEditor {
         const localize = createLocalizeFunction(this.hass);
 
         return html`
-            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'timetable'), 'entity', this._config.entity, '(period_s|today_s|tomorrow_s|next_day_s)_timetable')}
+            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'timetable'), 'entity', this._config.entity, '(timetable|emploi_du_temps)')}
             ${this.buildSwitchField(localize('editor.fields.display_header', 'Display header'), 'display_header', this._config.display_header, true)}
             ${this.buildSwitchField(localize('editor.fields.current_week_only', 'Current week only'), 'current_week_only', this._config.current_week_only, false)}
             ${this.buildNumberField(localize('editor.fields.max_days', 'Max days'), 'max_days', this._config.max_days, null, 1)}

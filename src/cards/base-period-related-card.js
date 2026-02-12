@@ -67,7 +67,23 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
 
     getActivePeriodsSensor() {
         const entityId = buildRelatedEntityId(this.config.entity, 'active_periods');
-        return this.hass.states[entityId] || null;
+        if (this.hass.states[entityId]) {
+            return this.hass.states[entityId];
+        }
+
+        // Fallback : essayer la convention alternative (FR/EN)
+        let altEntityId;
+        if (entityId.endsWith('_active_periods')) {
+            altEntityId = entityId.slice(0, -'_active_periods'.length) + '_periodes_actives';
+        } else if (entityId.endsWith('_periodes_actives')) {
+            altEntityId = entityId.slice(0, -'_periodes_actives'.length) + '_active_periods';
+        }
+
+        if (altEntityId && this.hass.states[altEntityId]) {
+            return this.hass.states[altEntityId];
+        }
+
+        return null;
     }
 
     getActivePeriods() {
@@ -103,7 +119,7 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
             let entity_state = this.hass.states[entity_name];
             if (!entity_state) continue;
             const periodKey = getAttribute(entity_state.attributes, 'period_key');
-            if (this.period_filter === 'all' || this.period_filter === periodKey) {
+            if (this.period_filter === null || this.period_filter === 'all' || this.period_filter === periodKey) {
                 const entityItems = getAttribute(entity_state.attributes, this.items_attribute_key);
                 if (Array.isArray(entityItems)) {
                     items.push(...entityItems);

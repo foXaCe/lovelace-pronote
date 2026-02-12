@@ -11,7 +11,7 @@ class PronoteDelaysCardEditor extends BasePronoteCardEditor {
         const localize = createLocalizeFunction(this.hass);
 
         return html`
-            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'delays'), 'entity', this._config.entity, 'delays')}
+            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'delays'), 'entity', this._config.entity, '(delays|retards)')}
             ${this.buildSwitchField(localize('editor.fields.display_header', 'Display header'), 'display_header', this._config.display_header)}
             ${this.buildNumberField(localize('editor.fields.max_delays', 'Max delays'), 'max_delays', this._config.max_delays)}
             ${this.buildSwitchField(localize('editor.fields.hide_period_switch', 'Hide period switch'), 'hide_period_switch', this._config.hide_period_switch, false)}

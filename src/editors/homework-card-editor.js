@@ -11,7 +11,7 @@ class PronoteHomeworkCardEditor extends BasePronoteCardEditor {
         const localize = createLocalizeFunction(this.hass);
 
         return html`
-            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'homework'), 'entity', this._config.entity, 'homework')}
+            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'homework'), 'entity', this._config.entity, '(homework|devoirs)')}
             ${this.buildSwitchField(localize('editor.fields.display_header', 'Display header'), 'display_header', this._config.display_header)}
             ${this.buildSwitchField(localize('editor.fields.current_week_only', 'Current week only'), 'current_week_only', this._config.current_week_only)}
             ${this.buildSwitchField(localize('editor.fields.reduce_done_homework', 'Reduce done homework'), 'reduce_done_homework', this._config.reduce_done_homework)}

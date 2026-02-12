@@ -73,10 +73,11 @@ const TRANSLATIONS = {
       "main_course": "Main course",
       "side_dish": "Side dish",
       "cheese": "Cheese",
-      "dessert": "Dessert"
+      "dessert": "Dessert",
+      "no_menu_details": "No menu details available"
     },
     "common": {
-      "no_data": "No data", "loading": "Loading...", "error": "Error", "unavailable": "Data unavailable"
+      "no_data": "No data", "loading": "Loading...", "error": "Error", "unavailable": "Data unavailable", "entity_required": "You need to define an entity"
     }
   },
   fr: {
@@ -150,10 +151,11 @@ const TRANSLATIONS = {
       "main_course": "Plat principal",
       "side_dish": "Accompagnement",
       "cheese": "Fromage",
-      "dessert": "Dessert"
+      "dessert": "Dessert",
+      "no_menu_details": "Aucun détail de menu disponible"
     },
     "common": {
-      "no_data": "Aucune donnée", "loading": "Chargement...", "error": "Erreur", "unavailable": "Données non disponibles"
+      "no_data": "Aucune donnée", "loading": "Chargement...", "error": "Erreur", "unavailable": "Données non disponibles", "entity_required": "Vous devez définir une entité"
     }
   }
 };

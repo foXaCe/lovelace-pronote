@@ -1,7 +1,7 @@
 import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from "./base-period-related-card";
 import { localize } from "../localize.js";
-import { getAttribute } from "../attribute-resolver.js";
+import { getAttribute, buildRelatedEntityId } from "../attribute-resolver.js";
 
 const getCardName = () => localize("cards.evaluations.name");
 const getCardDescription = () => localize("cards.evaluations.description");
@@ -28,7 +28,18 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
     }
 
 	getAcquisitionIcon(acquisition) {
-		const remappedEvaluations = this.config.mapping_evaluations[acquisition.abbreviation] || acquisition.abbreviation;
+		// L'intégration fournit 'level' (ex: "Maîtrise satisfaisante") et parfois 'abbreviation'
+		const LEVEL_TO_ABBR = {
+			'Très bonne maîtrise': 'A',
+			'Maîtrise satisfaisante': 'B',
+			'Maîtrise fragile': 'C',
+			'Maîtrise insuffisante': 'D',
+			'Absent': 'Abs',
+			'Non évalué': 'NE',
+			'Non rendu': 'NR',
+		};
+		const abbreviation = acquisition.abbreviation || LEVEL_TO_ABBR[acquisition.level] || acquisition.level || '?';
+		const remappedEvaluations = this.config.mapping_evaluations[abbreviation] || abbreviation;
 		let icon = '';
 		if (remappedEvaluations === 'A+') {
 			icon = '+';
@@ -36,7 +47,7 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
 			icon = 'a';
 		}
 		return html`
-			<span title="${remappedEvaluations}" class="acquisition-icon acquisition-icon-${remappedEvaluations.replace('+', 'plus')}">
+			<span title="${acquisition.level || remappedEvaluations}" class="acquisition-icon acquisition-icon-${remappedEvaluations.replace('+', 'plus')}">
 				${icon}
 			</span>
 		`;
@@ -62,10 +73,10 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
                 <label for="evaluation-full-detail-${index}">
                     <span class="evaluation-subject">${evaluation.subject}</span>
                 </label>
-                ${this.config.display_teacher ? html`<span class="evaluation-teacher">${evaluation.teacher}</span>` : ''}
+                ${this.config.display_teacher && evaluation.teacher ? html`<span class="evaluation-teacher">${evaluation.teacher}</span>` : ''}
                 <input type="checkbox" id="evaluation-full-detail-${index}" />
                 ${this.config.display_comment ? html`<span class="evaluation-comment">${evaluation.name}</span>` : ''}
-                ${this.config.display_description ? html`<span class="evaluation-description">${evaluation.description}</span>` : ''}
+                ${this.config.display_description && evaluation.description ? html`<span class="evaluation-description">${evaluation.description}</span>` : ''}
                 ${this.config.display_date ? html`<span class="evaluation-date">${this.getFormattedDate(evaluation.date)}</span>`: ''}
                 ${this.config.display_coefficient && evaluation.coefficient ? html`<span class="evaluation-coefficient">${this.localize('content.coefficient', 'Coeff.')} ${evaluation.coefficient}</span>` : ''}
             </td>
@@ -86,7 +97,7 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
             this.getPeriodSwitcher()
         ];
 
-        const timetableEntityId = this.config.entity.replace("_evaluations", "_period_s_timetable");
+        const timetableEntityId = buildRelatedEntityId(this.config.entity, 'timetable_period');
         const timetableEntity = this.hass.states[timetableEntityId];
         const lessons = timetableEntity ? (getAttribute(timetableEntity.attributes, 'lessons') || []) : [];
         const lessonsColors = {};

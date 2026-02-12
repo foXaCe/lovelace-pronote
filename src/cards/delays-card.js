@@ -34,7 +34,7 @@ class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
                     <span class="delay-hours">${delay.minutes} ${this.localize('content.minutes_late', 'minutes late')}</span>
                 </td>
                 <td>
-                    <span class="delay-reason">${delay.reasons}</span>
+                    <span class="delay-reason">${delay.reason}</span>
                 </td>
             </tr>
         `;

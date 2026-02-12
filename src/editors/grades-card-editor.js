@@ -11,7 +11,7 @@ class PronoteGradesCardEditor extends BasePronoteCardEditor {
         const localize = createLocalizeFunction(this.hass);
 
         return html`
-            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'grades'), 'entity', this._config.entity, 'grades')}
+            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'grades'), 'entity', this._config.entity, '(grades|notes)')}
             ${this.buildSwitchField(localize('editor.fields.display_header', 'Display header'), 'display_header', this._config.display_header)}
             ${this.buildSwitchField(localize('editor.fields.display_date', 'Display date'), 'display_date', this._config.display_date)}
             ${this.buildSwitchField(localize('editor.fields.display_comment', 'Display comment'), 'display_comment', this._config.display_comment)}

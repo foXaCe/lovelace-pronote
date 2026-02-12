@@ -1,6 +1,7 @@
 import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
+import { buildRelatedEntityId } from "../attribute-resolver.js";
 
 const getCardName = () => localize("cards.averages.name");
 const getCardDescription = () => localize("cards.averages.description");
@@ -14,8 +15,7 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
     allow_all_periods = false;
 
     getOverallAverageRow() {
-        let sensor_prefix = this.config.entity.split('_'+this.items_attribute_key)[0];
-        let overall_average_entity = `${sensor_prefix}_overall_average`;
+        let overall_average_entity = buildRelatedEntityId(this.config.entity, 'overall_average');
 
         if (this.period_filter !== null && !this.isCurrentPeriodSelected()) {
             overall_average_entity = `${overall_average_entity}_${this.period_filter}`;
@@ -59,7 +59,7 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
 
         let average_classes = [];
 
-        if (this.config.compare_with_ratio !== null) {
+        if (this.config.compare_with_ratio !== null && averageData.out_of) {
             let comparison_ratio = parseFloat(this.config.compare_with_ratio);
             let average_ratio = average / parseFloat(averageData.out_of.replace(',', '.'));
             average_classes.push(average_ratio >= comparison_ratio ? 'above-ratio' : 'below-ratio');
@@ -68,7 +68,7 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
             average_classes.push(average > class_average ? 'above-average' : 'below-average');
         }
 
-        let formatted_average = averageData.average+'/'+averageData.out_of;
+        let formatted_average = averageData.out_of ? averageData.average+'/'+averageData.out_of : averageData.average;
         if (this.config.average_format === 'short') {
             formatted_average = averageData.average;
         }

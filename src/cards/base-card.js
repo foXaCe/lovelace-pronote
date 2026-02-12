@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "../lit-helpers.js";
-import { createLocalizeFunction } from "../localize.js";
+import { createLocalizeFunction, localize } from "../localize.js";
 import { getAttribute } from "../attribute-resolver.js";
 
 class BasePronoteCard extends LitElement {
@@ -114,7 +114,7 @@ class BasePronoteCard extends LitElement {
 
     setConfig(config) {
         if (!config.entity) {
-            throw new Error('You need to define an entity');
+            throw new Error(localize('common.entity_required', 'You need to define an entity'));
         }
 
         this.config = {

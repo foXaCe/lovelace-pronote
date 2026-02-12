@@ -58,7 +58,21 @@ class BasePronoteCardEditor extends LitElement {
             return html``;
         }
         const sensorEntityId = buildRelatedEntityId(this._config.entity, 'active_periods');
-        const sensor = this.hass.states[sensorEntityId];
+        let sensor = this.hass.states[sensorEntityId];
+
+        // Fallback : essayer la convention alternative (FR/EN)
+        if (!sensor) {
+            let altEntityId;
+            if (sensorEntityId.endsWith('_active_periods')) {
+                altEntityId = sensorEntityId.slice(0, -'_active_periods'.length) + '_periodes_actives';
+            } else if (sensorEntityId.endsWith('_periodes_actives')) {
+                altEntityId = sensorEntityId.slice(0, -'_periodes_actives'.length) + '_active_periods';
+            }
+            if (altEntityId) {
+                sensor = this.hass.states[altEntityId];
+            }
+        }
+
         if (!sensor) {
             return html``;
         }

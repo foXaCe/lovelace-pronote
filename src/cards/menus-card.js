@@ -13,13 +13,20 @@ class PronoteMenusCard extends BasePronoteCard {
     header_title = 'Canteen menus of ';
     no_data_message = 'No menus to display';
 
+    hasMenuContent(menu) {
+        return (menu.first_meal?.length > 0 || menu.main_meal?.length > 0 || menu.side_meal?.length > 0 || menu.cheese?.length > 0 || menu.dessert?.length > 0);
+    }
+
     getMenuRow(menu) {
+        if (!this.hasMenuContent(menu)) {
+            return html`<tr><td colspan="2" class="pronote-menu-empty">${this.localize('content.no_menu_details', 'No menu details available')}</td></tr>`;
+        }
         return html`
-            ${menu.first_meal.length > 0 ? this.getMealRow(menu.first_meal, this.localize('content.starter', 'Starter')) : ''}
-            ${menu.main_meal.length > 0 ? this.getMealRow(menu.main_meal, this.localize('content.main_course', 'Main course')) : ''}
-            ${menu.side_meal.length > 0 ? this.getMealRow(menu.side_meal, this.localize('content.side_dish', 'Side dish')) : ''}
-            ${menu.cheese.length > 0 ? this.getMealRow(menu.cheese, this.localize('content.cheese', 'Cheese')) : ''}
-            ${menu.dessert.length > 0 ? this.getMealRow(menu.dessert, this.localize('content.dessert', 'Dessert')) : ''}
+            ${menu.first_meal?.length > 0 ? this.getMealRow(menu.first_meal, this.localize('content.starter', 'Starter')) : ''}
+            ${menu.main_meal?.length > 0 ? this.getMealRow(menu.main_meal, this.localize('content.main_course', 'Main course')) : ''}
+            ${menu.side_meal?.length > 0 ? this.getMealRow(menu.side_meal, this.localize('content.side_dish', 'Side dish')) : ''}
+            ${menu.cheese?.length > 0 ? this.getMealRow(menu.cheese, this.localize('content.cheese', 'Cheese')) : ''}
+            ${menu.dessert?.length > 0 ? this.getMealRow(menu.dessert, this.localize('content.dessert', 'Dessert')) : ''}
         `;
     }
 

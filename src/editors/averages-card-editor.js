@@ -11,7 +11,7 @@ class PronoteAveragesCardEditor extends BasePronoteCardEditor {
         const localize = createLocalizeFunction(this.hass);
 
         return html`
-            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'averages'), 'entity', this._config.entity, 'averages')}
+            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'averages'), 'entity', this._config.entity, '(averages|moyennes)')}
             ${this.buildSwitchField(localize('editor.fields.display_header', 'Display header'), 'display_header', this._config.display_header)}
             ${this.buildSelectField(localize('editor.fields.average_format', 'Average format'), 'average_format', [{value: 'full', label: localize('editor.labels.full', 'Full')}, {value: 'short', label: localize('editor.labels.short', 'Short')}], this._config.average_format)}
             ${this.buildSwitchField(localize('editor.fields.display_class_average', 'Display class average'), 'display_class_average', this._config.display_class_average)}
