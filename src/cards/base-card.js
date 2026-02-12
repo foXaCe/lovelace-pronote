@@ -13,7 +13,10 @@ class BasePronoteCard extends LitElement {
         };
     }
 
-    // Get localize function with current hass language
+    getLocale() {
+        return this.hass?.locale?.language || this.hass?.language || 'fr';
+    }
+
     localize(key, fallback) {
         const localizeFn = createLocalizeFunction(this.hass);
         return localizeFn(key, fallback);
@@ -97,7 +100,7 @@ class BasePronoteCard extends LitElement {
             return html`
                 <ha-card id="${this.config.entity}-card">
                     ${this.config.display_header ? this.getCardHeader() : ''}
-                    <div class="pronote-card-no-data">${this.localize('common.unavailable', 'Données non disponibles')}</div>
+                    <div class="pronote-card-no-data">${this.localize('common.unavailable', 'Data unavailable')}</div>
                 </ha-card>`;
         }
 

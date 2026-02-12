@@ -21,7 +21,7 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
         if (this.allow_all_periods) {
             available_periods.push({
                 id: 'all',
-                name: this.localize('content.all_periods', 'Tout')
+                name: this.localize('content.all_periods', 'All')
             });
         }
         let tabs = [];

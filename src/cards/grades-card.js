@@ -9,13 +9,13 @@ const getCardDescription = () => localize("cards.grades.description");
 class PronoteGradesCard extends BasePeriodRelatedPronoteCard {
 
     cardType = 'grades';
-    header_title = 'Notes de ';
-    no_data_message = 'Aucune note disponible';
+    header_title = 'Grades of ';
+    no_data_message = 'No grades available';
     items_attribute_key = 'grades';
 
     getFormattedDate(date) {
         return (new Date(date))
-            .toLocaleDateString('fr-FR', {weekday: 'short', day: '2-digit', month: '2-digit'})
+            .toLocaleDateString(this.getLocale(), {weekday: 'short', day: '2-digit', month: '2-digit'})
             .replace(/^(.)/, (match) => match.toUpperCase())
         ;
     }
@@ -50,11 +50,11 @@ class PronoteGradesCard extends BasePeriodRelatedPronoteCard {
                 <span class="grade-subject">${gradeData.subject}</span>
                 ${this.config.display_comment ? html`<span class="grade-comment">${gradeData.comment}</span>` : ''}
                 ${this.config.display_date ? html`<span class="grade-date">${this.getFormattedDate(gradeData.date)}</span>`: ''}
-                ${this.config.display_coefficient && gradeData.coefficient ? html`<span class="grade-coefficient">${this.localize('content.coefficient', 'Coef.')} ${gradeData.coefficient}</span>` : ''}
+                ${this.config.display_coefficient && gradeData.coefficient ? html`<span class="grade-coefficient">${this.localize('content.coefficient', 'Coeff.')} ${gradeData.coefficient}</span>` : ''}
             </td>
             <td class="grade-detail">
                 <span class="grade-value">${formatted_grade}</span>
-                ${this.config.display_class_average && gradeData.class_average ? html`<span class="grade-class-average">${this.localize('content.class_average', 'Moy.')} ${gradeData.class_average}</span>` : ''}
+                ${this.config.display_class_average && gradeData.class_average ? html`<span class="grade-class-average">${this.localize('content.class_average', 'Avg.')} ${gradeData.class_average}</span>` : ''}
                 ${this.config.display_class_min && gradeData.min ? html`<span class="grade-class-min">${this.localize('content.class_min', 'Min.')} ${gradeData.min}</span>` : ''}
                 ${this.config.display_class_max && gradeData.max ? html`<span class="grade-class-max">${this.localize('content.class_max', 'Max.')} ${gradeData.max}</span>` : ''}
             </td>

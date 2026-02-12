@@ -9,8 +9,8 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
 
     cardType = 'averages';
     items_attribute_key = 'averages';
-    header_title = 'Moyennes de ';
-    no_data_message = 'Aucune moyenne';
+    header_title = 'Averages of ';
+    no_data_message = 'No averages';
     allow_all_periods = false;
 
     getOverallAverageRow() {
@@ -45,7 +45,7 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
         <tr class="${average_classes.join(' ')} overall-average">
             <td class="average-color"><span></span></td>
             <td class="average-description">
-                <span class="average-subject">${this.localize('content.overall_average', 'Moyenne générale')}</span>
+                <span class="average-subject">${this.localize('content.overall_average', 'Overall average')}</span>
             </td>
             <td class="average-detail">
                 <span class="average-value"><span>${overall_average.replace('.', ',')}</span></span>
@@ -81,7 +81,7 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
             </td>
             <td class="average-detail">
                 <span class="average-value">${formatted_average}</span>
-                ${this.config.display_class_average && averageData.class ? html`<span class="average-class-average">${this.localize('content.class_label', 'Classe')} ${averageData.class}</span>` : ''}
+                ${this.config.display_class_average && averageData.class ? html`<span class="average-class-average">${this.localize('content.class_label', 'Class')} ${averageData.class}</span>` : ''}
                 ${this.config.display_class_min && averageData.min ? html`<span class="average-class-min">${this.localize('content.class_min', 'Min.')} ${averageData.min}</span>` : ''}
                 ${this.config.display_class_max && averageData.max ? html`<span class="average-class-max">${this.localize('content.class_max', 'Max.')} ${averageData.max}</span>` : ''}
             </td>

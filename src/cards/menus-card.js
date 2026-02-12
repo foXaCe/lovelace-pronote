@@ -10,15 +10,15 @@ const getCardDescription = () => localize("cards.menus.description", "Display th
 class PronoteMenusCard extends BasePronoteCard {
 
     cardType = 'menus';
-    header_title = 'Menus de la cantine de ';
-    no_data_message = 'Pas de menus à afficher';
+    header_title = 'Canteen menus of ';
+    no_data_message = 'No menus to display';
 
     getMenuRow(menu) {
         return html`
-            ${menu.first_meal.length > 0 ? this.getMealRow(menu.first_meal, this.localize('content.starter', 'Entrée')) : ''}
-            ${menu.main_meal.length > 0 ? this.getMealRow(menu.main_meal, this.localize('content.main_course', 'Plat principal')) : ''}
-            ${menu.side_meal.length > 0 ? this.getMealRow(menu.side_meal, this.localize('content.side_dish', 'Accompagnement')) : ''}
-            ${menu.cheese.length > 0 ? this.getMealRow(menu.cheese, this.localize('content.cheese', 'Fromage')) : ''}
+            ${menu.first_meal.length > 0 ? this.getMealRow(menu.first_meal, this.localize('content.starter', 'Starter')) : ''}
+            ${menu.main_meal.length > 0 ? this.getMealRow(menu.main_meal, this.localize('content.main_course', 'Main course')) : ''}
+            ${menu.side_meal.length > 0 ? this.getMealRow(menu.side_meal, this.localize('content.side_dish', 'Side dish')) : ''}
+            ${menu.cheese.length > 0 ? this.getMealRow(menu.cheese, this.localize('content.cheese', 'Cheese')) : ''}
             ${menu.dessert.length > 0 ? this.getMealRow(menu.dessert, this.localize('content.dessert', 'Dessert')) : ''}
         `;
     }
@@ -63,7 +63,7 @@ class PronoteMenusCard extends BasePronoteCard {
 
     getFormattedDate(menu) {
         return (new Date(menu.date))
-            .toLocaleDateString('fr-FR', {weekday: 'long', day: '2-digit', month: '2-digit'})
+            .toLocaleDateString(this.getLocale(), {weekday: 'long', day: '2-digit', month: '2-digit'})
             .replace(/^(.)/, (match) => match.toUpperCase())
         ;
     }

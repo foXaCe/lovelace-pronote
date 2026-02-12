@@ -9,8 +9,8 @@ class PronoteAbsencesCard extends BasePeriodRelatedPronoteCard {
 
     cardType = 'absences';
     items_attribute_key = 'absences';
-    header_title = 'Absences de ';
-    no_data_message = 'Aucune absence';
+    header_title = 'Absences of ';
+    no_data_message = 'No absences';
 
     getAbsencesRow(absence) {
         let from = this.getFormattedDate(absence.from);
@@ -21,7 +21,7 @@ class PronoteAbsencesCard extends BasePeriodRelatedPronoteCard {
                 <span>${absence.justified ? html`<ha-icon icon="mdi:check"></ha-icon>` : html`<ha-icon icon="mdi:clock-alert-outline"></ha-icon>`}</span>
             </td>
             <td><span style="background-color:${absence.justified ? '#107c41' : '#e73a1f'}"></span></td>
-            <td><span class="absence-from">${from} ${this.localize('content.date_range_to', 'au')} ${to}</span><br><span class="absence-hours">${absence.hours} ${this.localize('content.hours_missed', 'de cours manquées')}</span>
+            <td><span class="absence-from">${from} ${this.localize('content.date_range_to', 'to')} ${to}</span><br><span class="absence-hours">${absence.hours} ${this.localize('content.hours_missed', 'hours of class missed')}</span>
         </td>
             <td>
                 <span class="absence-reason">${absence.reason}</span>
@@ -32,7 +32,7 @@ class PronoteAbsencesCard extends BasePeriodRelatedPronoteCard {
     }
 
     getFormattedDate(date) {
-        return (new Date(date)) ? new Date(date).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/^(.)/, (match) => match.toUpperCase()) : '';
+        return (new Date(date)) ? new Date(date).toLocaleDateString(this.getLocale(), { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/^(.)/, (match) => match.toUpperCase()) : '';
     }
 
     getCardContent() {

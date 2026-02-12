@@ -8,8 +8,8 @@ const getCardDescription = () => localize("cards.delays.description");
 class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
 
     cardType = 'delays';
-    header_title = 'Retards de ';
-    no_data_message = 'Aucun retard';
+    header_title = 'Delays of ';
+    no_data_message = 'No delays';
     items_attribute_key = 'delays';
 
     // Génère une ligne pour un retard donné
@@ -31,7 +31,7 @@ class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
                 <td>
                     <span class="delay-from">${date}</span>
                     <br>
-                    <span class="delay-hours">${delay.minutes} ${this.localize('content.minutes_late', 'minutes de retard')}</span>
+                    <span class="delay-hours">${delay.minutes} ${this.localize('content.minutes_late', 'minutes late')}</span>
                 </td>
                 <td>
                     <span class="delay-reason">${delay.reasons}</span>
@@ -45,7 +45,7 @@ class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
     // Formate la date d'un retard
     getFormattedDate(date) {
         return (new Date(date))
-            ? new Date(date).toLocaleDateString('fr-FR', {
+            ? new Date(date).toLocaleDateString(this.getLocale(), {
                 weekday: 'long',
                 day: '2-digit',
                 month: '2-digit',

@@ -10,8 +10,8 @@ const getCardDescription = () => localize("cards.timetable.description");
 class PronoteTimetableCard extends BasePronoteCard {
 
     cardType = 'timetable';
-    header_title = 'Emploi du temps de ';
-    no_data_message = 'Pas d\'emploi du temps à afficher';
+    header_title = 'Timetable of ';
+    no_data_message = 'No timetable to display';
     lunchBreakRendered = false;
 
     getBreakRow(label, ended) {
@@ -32,7 +32,7 @@ class PronoteTimetableCard extends BasePronoteCard {
 
         let prefix = html``;
         if (this.config.display_lunch_break && lesson.is_afternoon && !this.lunchBreakRendered) {
-            prefix = this.getBreakRow(this.localize('content.lunch_break', 'Repas'), this.config.dim_ended_lessons && startAt < currentDate);
+            prefix = this.getBreakRow(this.localize('content.lunch_break', 'Lunch break'), this.config.dim_ended_lessons && startAt < currentDate);
             this.lunchBreakRendered = true;
         }
 
@@ -46,7 +46,7 @@ class PronoteTimetableCard extends BasePronoteCard {
             <td>
                 <span class="lesson-name">${lesson.lesson}</span>
                 ${this.config.display_classroom ? html`<span class="lesson-classroom">
-                    ${lesson.classroom ? this.localize('content.classroom', 'Salle') + ' ' + lesson.classroom : ''}
+                    ${lesson.classroom ? this.localize('content.classroom', 'Room') + ' ' + lesson.classroom : ''}
                     ${lesson.classroom && this.config.display_teacher ? ', ' : '' }
                 </span>` : '' }
                 ${this.config.display_teacher ? html`<span class="lesson-teacher">
@@ -63,13 +63,13 @@ class PronoteTimetableCard extends BasePronoteCard {
 
     getFormattedDate(lesson) {
         return (new Date(lesson.start_at))
-            .toLocaleDateString('fr-FR', {weekday: 'long', day: '2-digit', month: '2-digit'})
+            .toLocaleDateString(this.getLocale(), {weekday: 'long', day: '2-digit', month: '2-digit'})
             .replace(/^(.)/, (match) => match.toUpperCase())
         ;
     }
 
     getFormattedTime(time) {
-        return new Intl.DateTimeFormat("fr-FR", {hour:"numeric", minute:"numeric"}).format(new Date(time));
+        return new Intl.DateTimeFormat(this.getLocale(), {hour:"numeric", minute:"numeric"}).format(new Date(time));
     }
 
     getDayHeader(firstLesson, dayStartAt, dayEndAt, daysCount) {
@@ -163,7 +163,7 @@ class PronoteTimetableCard extends BasePronoteCard {
                 const nextLessonStartAt = new Date(nextLesson.start_at);
                 if (lesson.is_morning === nextLesson.is_morning && Math.floor((nextLessonStartAt-currentEndAt) / 1000 / 60) > 30) {
                     const now = new Date();
-                    dayTemplates.push(this.getBreakRow(this.localize('content.no_class', 'Pas de cours'), this.config.dim_ended_lessons && nextLessonStartAt < now));
+                    dayTemplates.push(this.getBreakRow(this.localize('content.no_class', 'No class'), this.config.dim_ended_lessons && nextLessonStartAt < now));
                 }
             }
         }

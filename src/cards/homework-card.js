@@ -10,18 +10,18 @@ const getCardDescription = () => localize("cards.homework.description");
 class PronoteHomeworkCard extends BasePronoteCard {
 
     cardType = 'homework';
-    header_title = 'Devoirs de ';
-    no_data_message = 'Pas de devoirs à faire';
+    header_title = 'Homework of ';
+    no_data_message = 'No homework';
 
     getFormattedDate(date) {
         return (new Date(date))
-            .toLocaleDateString('fr-FR', {weekday: 'long', day: '2-digit', month: '2-digit'})
+            .toLocaleDateString(this.getLocale(), {weekday: 'long', day: '2-digit', month: '2-digit'})
             .replace(/^(.)/, (match) => match.toUpperCase())
         ;
     }
 
     getFormattedTime(time) {
-        return new Intl.DateTimeFormat("fr-FR", {hour:"numeric", minute:"numeric"}).format(new Date(time));
+        return new Intl.DateTimeFormat(this.getLocale(), {hour:"numeric", minute:"numeric"}).format(new Date(time));
     }
 
     getDayHeader(homework, daysCount) {

@@ -9,13 +9,13 @@ const getCardDescription = () => localize("cards.evaluations.description");
 class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
 
     cardType = 'evaluations';
-    header_title = 'Evaluations de ';
-    no_data_message = 'Pas d\'évaluation à afficher';
+    header_title = 'Evaluations of ';
+    no_data_message = 'No evaluations to display';
     items_attribute_key = 'evaluations';
 
     getFormattedDate(date) {
         return (new Date(date))
-            .toLocaleDateString('fr-FR', {weekday: 'short', day: '2-digit', month: '2-digit'})
+            .toLocaleDateString(this.getLocale(), {weekday: 'short', day: '2-digit', month: '2-digit'})
             .replace(/^(.)/, (match) => match.toUpperCase())
         ;
     }
@@ -67,7 +67,7 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
                 ${this.config.display_comment ? html`<span class="evaluation-comment">${evaluation.name}</span>` : ''}
                 ${this.config.display_description ? html`<span class="evaluation-description">${evaluation.description}</span>` : ''}
                 ${this.config.display_date ? html`<span class="evaluation-date">${this.getFormattedDate(evaluation.date)}</span>`: ''}
-                ${this.config.display_coefficient && evaluation.coefficient ? html`<span class="evaluation-coefficient">${this.localize('content.coefficient', 'Coef.')} ${evaluation.coefficient}</span>` : ''}
+                ${this.config.display_coefficient && evaluation.coefficient ? html`<span class="evaluation-coefficient">${this.localize('content.coefficient', 'Coeff.')} ${evaluation.coefficient}</span>` : ''}
             </td>
             <td class="evaluation-detail">
                 ${acquisitionIcons}
