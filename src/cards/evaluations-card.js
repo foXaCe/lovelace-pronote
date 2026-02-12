@@ -1,21 +1,17 @@
+import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from "./base-period-related-card";
 import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+import { getAttribute } from "../attribute-resolver.js";
 
 const getCardName = () => localize("cards.evaluations.name");
 const getCardDescription = () => localize("cards.evaluations.description");
 
 class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
 
-    header_title = 'Evaluations de '
-    no_data_message = 'Pas d\'évaluation à afficher'
-    period_sensor_key = 'evaluations'
-    items_attribute_key = 'evaluations'
+    cardType = 'evaluations';
+    header_title = 'Evaluations de ';
+    no_data_message = 'Pas d\'évaluation à afficher';
+    items_attribute_key = 'evaluations';
 
     getFormattedDate(date) {
         return (new Date(date))
@@ -71,7 +67,7 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
                 ${this.config.display_comment ? html`<span class="evaluation-comment">${evaluation.name}</span>` : ''}
                 ${this.config.display_description ? html`<span class="evaluation-description">${evaluation.description}</span>` : ''}
                 ${this.config.display_date ? html`<span class="evaluation-date">${this.getFormattedDate(evaluation.date)}</span>`: ''}
-                ${this.config.display_coefficient && evaluation.coefficient ? html`<span class="evaluation-coefficient">Coef. ${evaluation.coefficient}</span>` : ''}
+                ${this.config.display_coefficient && evaluation.coefficient ? html`<span class="evaluation-coefficient">${this.localize('content.coefficient', 'Coef.')} ${evaluation.coefficient}</span>` : ''}
             </td>
             <td class="evaluation-detail">
                 ${acquisitionIcons}
@@ -82,42 +78,33 @@ class PronoteEvaluationsCard extends BasePeriodRelatedPronoteCard {
     }
 
     getCardContent() {
-        const stateObj = this.hass.states[this.config.entity];
+        const evaluations = this.getFilteredItems();
+        const maxEvaluations = this.config.max_evaluations ?? evaluations.length;
 
-        if (stateObj) {
-            const evaluations = this.getFilteredItems();
-            const max_evaluations = this.config.max_evaluations ?? evaluations.length;
+        const evaluationsRows = [];
+        const itemTemplates = [
+            this.getPeriodSwitcher()
+        ];
 
-            const evaluationsRows = [];
-            const itemTemplates = [
-                this.getPeriodSwitcher()
-            ];
-
-            // Va chercher les couleurs des matières
-            const lessons = this.hass.states[this.config.entity.replace("_evaluations", "_period_s_timetable")].attributes['lessons']
-            var lessons_colors = {};
-            if (lessons) {
-                for (let index = 0; index < lessons.length; index++) {
-                    let lesson = lessons[index];
-                    lessons_colors[lesson.lesson]=lesson.background_color;
-                }
-            }
-
-            for (let index = 0; index < max_evaluations; index++) {
-                let evaluation = evaluations[index];
-                evaluationsRows.push(this.getEvaluationRow(evaluation, index, lessons_colors));
-            }
-
-            if (evaluationsRows.length > 0) {
-                itemTemplates.push(html`<table>${evaluationsRows}</table>`);
-            } else {
-                itemTemplates.push(this.noDataMessage());
-            }
-
-            return itemTemplates;
+        const timetableEntityId = this.config.entity.replace("_evaluations", "_period_s_timetable");
+        const timetableEntity = this.hass.states[timetableEntityId];
+        const lessons = timetableEntity ? (getAttribute(timetableEntity.attributes, 'lessons') || []) : [];
+        const lessonsColors = {};
+        for (const lesson of lessons) {
+            lessonsColors[lesson.lesson] = lesson.background_color;
         }
 
-        return [];
+        for (let index = 0; index < maxEvaluations && index < evaluations.length; index++) {
+            evaluationsRows.push(this.getEvaluationRow(evaluations[index], index, lessonsColors));
+        }
+
+        if (evaluationsRows.length > 0) {
+            itemTemplates.push(html`<table>${evaluationsRows}</table>`);
+        } else {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
     }
 
     getDefaultConfig() {

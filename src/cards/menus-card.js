@@ -1,38 +1,25 @@
-import BasePronoteCard from "./base-card"
+import { html, css } from "../lit-helpers.js";
+import BasePronoteCard from "./base-card";
 import { localize } from "../localize.js";
+import { getAttribute } from "../attribute-resolver.js";
+import { getWeekNumber, isSameDay } from "../utils.js";
 
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
-
-// Detect language for card registration
-const getCardName = () => localize("cards.menus.name", "Pronote Menus Card", { language: navigator.language?.split('-')[0] });
-const getCardDescription = () => localize("cards.menus.description", "Display the menus from Pronote", { language: navigator.language?.split('-')[0] });
-
-function getWeekNumber(date) {
-    var d = new Date(+date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    return Math.ceil((((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7) + 1) / 7);
-}
-
-function isSameDay(d1, d2) {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-}
+const getCardName = () => localize("cards.menus.name", "Pronote Menus Card");
+const getCardDescription = () => localize("cards.menus.description", "Display the menus from Pronote");
 
 class PronoteMenusCard extends BasePronoteCard {
 
+    cardType = 'menus';
+    header_title = 'Menus de la cantine de ';
+    no_data_message = 'Pas de menus à afficher';
+
     getMenuRow(menu) {
         return html`
-            ${menu.first_meal.length > 0 ? this.getMealRow(menu.first_meal, 'Entrée') : ''}
-            ${menu.main_meal.length > 0 ? this.getMealRow(menu.main_meal, 'Plat principal') : ''}
-            ${menu.side_meal.length > 0 ? this.getMealRow(menu.side_meal, 'Accompagnement') : ''}
-            ${menu.cheese.length > 0 ? this.getMealRow(menu.cheese, 'Fromage') : ''}
-            ${menu.dessert.length > 0 ? this.getMealRow(menu.dessert, 'Dessert') : ''}
+            ${menu.first_meal.length > 0 ? this.getMealRow(menu.first_meal, this.localize('content.starter', 'Entrée')) : ''}
+            ${menu.main_meal.length > 0 ? this.getMealRow(menu.main_meal, this.localize('content.main_course', 'Plat principal')) : ''}
+            ${menu.side_meal.length > 0 ? this.getMealRow(menu.side_meal, this.localize('content.side_dish', 'Accompagnement')) : ''}
+            ${menu.cheese.length > 0 ? this.getMealRow(menu.cheese, this.localize('content.cheese', 'Fromage')) : ''}
+            ${menu.dessert.length > 0 ? this.getMealRow(menu.dessert, this.localize('content.dessert', 'Dessert')) : ''}
         `;
     }
 
@@ -95,124 +82,71 @@ class PronoteMenusCard extends BasePronoteCard {
         </div>`;
     }
 
-    changeDay(direction, e) {
-        e.preventDefault();
-        if (e.target.classList.contains('disabled')) {
-            return;
-        }
-
-        const activeDay = e.target.parentElement.parentElement;
-        let hasPreviousDay = activeDay.previousElementSibling && activeDay.previousElementSibling.classList.contains('pronote-menus-day-wrapper');
-        let hasNextDay = activeDay.nextElementSibling && activeDay.nextElementSibling.classList.contains('pronote-menus-day-wrapper');
-        let newActiveDay = null;
-
-        if (direction === 'previous' && hasPreviousDay) {
-            newActiveDay = activeDay.previousElementSibling;
-        } else if (direction === 'next' && hasNextDay) {
-            newActiveDay = activeDay.nextElementSibling;
-        }
-
-        if (newActiveDay) {
-            activeDay.classList.remove('active');
-            newActiveDay.classList.add('active');
-
-            hasPreviousDay = newActiveDay.previousElementSibling && newActiveDay.previousElementSibling.classList.contains('pronote-menus-day-wrapper');
-            hasNextDay = newActiveDay.nextElementSibling && newActiveDay.nextElementSibling.classList.contains('pronote-menus-day-wrapper');
-
-            if (!hasPreviousDay) {
-                newActiveDay.querySelector('.pronote-menus-header-arrow-left').classList.add('disabled');
-            }
-
-            if (!hasNextDay) {
-                newActiveDay.querySelector('.pronote-menus-header-arrow-right').classList.add('disabled');
-            }
-        }
-    }
-
-    // we override the render method to return the card content
-    render() {
-        if (!this.config || !this.hass) {
-            return html``;
-        }
-
+    getCardContent() {
         const stateObj = this.hass.states[this.config.entity];
-
-        if (!stateObj) {
-            return html``;
-        }
-
-        const menus = stateObj.attributes['menus'] || [];
+        const menus = getAttribute(stateObj.attributes, 'menus') || [];
 
         const currentWeekNumber = getWeekNumber(new Date());
 
-            const itemTemplates = [];
-            let daysCount = 0;
+        const itemTemplates = [];
+        let daysCount = 0;
 
-            let now = new Date();
-            let activeDay = 0;
+        let now = new Date();
+        let activeDay = 0;
 
-            for (let index = 0; index < menus.length; index++) {
-                let menu = menus[index];
-                let lunchPassedAt = new Date(menu.date);
-                lunchPassedAt.setHours(14, 0, 0, 0);
+        for (let index = 0; index < menus.length; index++) {
+            let menu = menus[index];
+            let lunchPassedAt = new Date(menu.date);
+            lunchPassedAt.setHours(14, 0, 0, 0);
 
-                if (
-                    this.config.switch_to_next_day
-                    && isSameDay(lunchPassedAt, now) && lunchPassedAt < now
-                ) {
-                    activeDay = daysCount + 1;
-                }
+            if (
+                this.config.switch_to_next_day
+                && isSameDay(lunchPassedAt, now) && lunchPassedAt < now
+            ) {
+                activeDay = daysCount + 1;
+            }
 
-                if (this.config.current_week_only) {
-                    if (getWeekNumber(new Date(menu.date)) > currentWeekNumber) {
-                        break;
-                    }
-                }
-
-                itemTemplates.push(html`
-                    <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-menus-day-wrapper ${daysCount === activeDay ? 'active' : ''}">
-                        ${this.getDayHeader(menu, daysCount)}
-                        ${this.config.display_menu_name ? html`<div class="pronote-menus-name">${menu.name}</div>` : ''}
-                        <table>${this.getMenuRow(menu)}</table>
-                    </div>
-                `);
-
-                daysCount++;
-                if (this.config.max_days && this.config.max_days <= daysCount) {
+            if (this.config.current_week_only) {
+                if (getWeekNumber(new Date(menu.date)) > currentWeekNumber) {
                     break;
                 }
             }
 
-            return html`
-                <ha-card id="${this.config.entity}-card" class="pronote-menus-card-slider">
-                    ${this.config.display_header ? this.getCardHeader() : ''}
-                    ${itemTemplates}
-                </ha-card>`
-            ;
-    }
+            itemTemplates.push(html`
+                <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-menus-day-wrapper ${daysCount === activeDay ? 'active' : ''}">
+                    ${this.getDayHeader(menu, daysCount)}
+                    ${this.config.display_menu_name ? html`<div class="pronote-menus-name">${menu.name}</div>` : ''}
+                    <table>${this.getMenuRow(menu)}</table>
+                </div>
+            `);
 
-    setConfig(config) {
-        if (!config.entity) {
-            throw new Error('You need to define an entity');
+            daysCount++;
+            if (this.config.max_days && this.config.max_days <= daysCount) {
+                break;
+            }
         }
 
-        const defaultConfig = {
-            entity: null,
-            display_header: true,
+        if (itemTemplates.length === 0) {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
+    }
+
+    getCardClasses() {
+        return 'pronote-menus-card-slider';
+    }
+
+    getDefaultConfig() {
+        return {
+            ...super.getDefaultConfig(),
             display_menu_name: true,
             display_labels: true,
             max_days: null,
             current_week_only: false,
             switch_to_next_day: false,
-        }
-
-        this.config = {
-            ...defaultConfig,
-            ...config
+            enable_slider: false,
         };
-
-        this.header_title = 'Menus de la cantine de ';
-        this.no_data_message = 'Pas de menus à afficher';
     }
 
     static get styles() {

@@ -1,25 +1,20 @@
+import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
 
 const getCardName = () => localize("cards.averages.name");
 const getCardDescription = () => localize("cards.averages.description");
 
 class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
 
-    period_sensor_key = 'averages'
-    items_attribute_key = 'averages'
-    header_title = 'Moyennes de '
-    no_data_message = 'Aucune moyenne'
-    allow_all_periods = false
+    cardType = 'averages';
+    items_attribute_key = 'averages';
+    header_title = 'Moyennes de ';
+    no_data_message = 'Aucune moyenne';
+    allow_all_periods = false;
 
     getOverallAverageRow() {
-        let sensor_prefix = this.config.entity.split('_'+this.period_sensor_key)[0];
+        let sensor_prefix = this.config.entity.split('_'+this.items_attribute_key)[0];
         let overall_average_entity = `${sensor_prefix}_overall_average`;
 
         if (this.period_filter !== null && !this.isCurrentPeriodSelected()) {
@@ -50,7 +45,7 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
         <tr class="${average_classes.join(' ')} overall-average">
             <td class="average-color"><span></span></td>
             <td class="average-description">
-                <span class="average-subject">Moyenne générale</span>
+                <span class="average-subject">${this.localize('content.overall_average', 'Moyenne générale')}</span>
             </td>
             <td class="average-detail">
                 <span class="average-value"><span>${overall_average.replace('.', ',')}</span></span>
@@ -86,43 +81,36 @@ class PronoteAveragesCard extends BasePeriodRelatedPronoteCard {
             </td>
             <td class="average-detail">
                 <span class="average-value">${formatted_average}</span>
-                ${this.config.display_class_average && averageData.class ? html`<span class="average-class-average">Classe ${averageData.class}</span>` : ''}
-                ${this.config.display_class_min && averageData.min ? html`<span class="average-class-min">Min. ${averageData.min}</span>` : ''}
-                ${this.config.display_class_max && averageData.max ? html`<span class="average-class-max">Max. ${averageData.max}</span>` : ''}
+                ${this.config.display_class_average && averageData.class ? html`<span class="average-class-average">${this.localize('content.class_label', 'Classe')} ${averageData.class}</span>` : ''}
+                ${this.config.display_class_min && averageData.min ? html`<span class="average-class-min">${this.localize('content.class_min', 'Min.')} ${averageData.min}</span>` : ''}
+                ${this.config.display_class_max && averageData.max ? html`<span class="average-class-max">${this.localize('content.class_max', 'Max.')} ${averageData.max}</span>` : ''}
             </td>
         </tr>
         `;
     }
 
     getCardContent() {
-        const stateObj = this.hass.states[this.config.entity];
+        const averages = this.getFilteredItems();
+        const itemTemplates = [
+            this.getPeriodSwitcher()
+        ];
+        const averagesRows = [];
 
-        if (stateObj) {
-            const averages = this.getFilteredItems();
-            const itemTemplates = [
-                this.getPeriodSwitcher()
-            ];
-            const averagesRows = [];
-
-            if (this.config.display_overall_average) {
-                averagesRows.push(this.getOverallAverageRow(averages));
-            }
-
-            for (let index = 0; index < averages.length; index++) {
-                let average = averages[index];
-                averagesRows.push(this.getAverageRow(average));
-            }
-
-            if (averagesRows.length > 0) {
-                itemTemplates.push(html`<table>${averagesRows}</table>`);
-            } else {
-                itemTemplates.push(this.noDataMessage());
-            }
-
-            return itemTemplates;
+        if (this.config.display_overall_average) {
+            averagesRows.push(this.getOverallAverageRow());
         }
 
-        return [];
+        for (const average of averages) {
+            averagesRows.push(this.getAverageRow(average));
+        }
+
+        if (averagesRows.length > 0) {
+            itemTemplates.push(html`<table>${averagesRows}</table>`);
+        } else {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
     }
 
     getDefaultConfig() {

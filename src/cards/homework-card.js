@@ -1,23 +1,17 @@
-import BasePronoteCard from "./base-card"
+import { html, css } from "../lit-helpers.js";
+import BasePronoteCard from "./base-card";
 import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+import { getAttribute } from "../attribute-resolver.js";
+import { getWeekNumber } from "../utils.js";
 
 const getCardName = () => localize("cards.homework.name");
 const getCardDescription = () => localize("cards.homework.description");
 
-function getWeekNumber(date) {
-    var d = new Date(+date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    return Math.ceil((((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7) + 1) / 7);
-}
-
 class PronoteHomeworkCard extends BasePronoteCard {
+
+    cardType = 'homework';
+    header_title = 'Devoirs de ';
+    no_data_message = 'Pas de devoirs à faire';
 
     getFormattedDate(date) {
         return (new Date(date))
@@ -44,50 +38,17 @@ class PronoteHomeworkCard extends BasePronoteCard {
         </div>`;
     }
 
-    changeDay(direction, e) {
-        e.preventDefault();
-        if (e.target.classList.contains('disabled')) {
-            return;
-        }
-
-        const activeDay = e.target.parentElement.parentElement;
-        let hasPreviousDay = activeDay.previousElementSibling && activeDay.previousElementSibling.classList.contains('pronote-homework-day-wrapper');
-        let hasNextDay = activeDay.nextElementSibling && activeDay.nextElementSibling.classList.contains('pronote-homework-day-wrapper');
-        let newActiveDay = null;
-
-        if (direction === 'previous' && hasPreviousDay) {
-            newActiveDay = activeDay.previousElementSibling;
-        } else if (direction === 'next' && hasNextDay) {
-            newActiveDay = activeDay.nextElementSibling;
-        }
-
-        if (newActiveDay) {
-            activeDay.classList.remove('active');
-            newActiveDay.classList.add('active');
-
-            hasPreviousDay = newActiveDay.previousElementSibling && newActiveDay.previousElementSibling.classList.contains('pronote-homework-day-wrapper');
-            hasNextDay = newActiveDay.nextElementSibling && newActiveDay.nextElementSibling.classList.contains('pronote-homework-day-wrapper');
-
-            if (!hasPreviousDay) {
-                newActiveDay.querySelector('.pronote-homework-header-arrow-left').classList.add('disabled');
-            }
-
-            if (!hasNextDay) {
-                newActiveDay.querySelector('.pronote-homework-header-arrow-right').classList.add('disabled');
-            }
-        }
-    }
-
     getHomeworkRow(homework, index) {
-        let description = homework.description.trim().replace("\n", "<br />");
+        let descriptionLines = (homework.description || '').trim().split("\n");
         let files = [];
-        homework.files.forEach((file) => {
-            if (file.name.trim() === '') {
-                return;
-            }
-            files.push(html`<span class="homework-file">➤ <a href="${file.url}">${file.name}</a></span>`);
-        });
-
+        if (homework.files) {
+            homework.files.forEach((file) => {
+                if (file.name.trim() === '') {
+                    return;
+                }
+                files.push(html`<span class="homework-file">➤ <a href="${file.url}">${file.name}</a></span>`);
+            });
+        }
 
         return html`
         <tr class="${homework.done ? 'homework-done':''}">
@@ -97,7 +58,7 @@ class PronoteHomeworkCard extends BasePronoteCard {
                     <span class="homework-subject">${homework.subject}</span>
                 </label>
                 <input type="checkbox" id="homework-${index}" />
-                <span class="homework-description">${description}</span>
+                <span class="homework-description">${descriptionLines.map((line, i) => i === 0 ? line : html`<br>${line}`)}</span>
                 ${files.length > 0 ? html`<span class="homework-files">${files}</span>` : ''}
             </td>
             <td class="homework-status">
@@ -116,92 +77,69 @@ class PronoteHomeworkCard extends BasePronoteCard {
         `;
     }
 
-    render() {
-        if (!this.config || !this.hass) {
-            return html``;
-        }
-
+    getCardContent() {
         const stateObj = this.hass.states[this.config.entity];
-        const homework = this.hass.states[this.config.entity].attributes['homework'];
+        const homework = getAttribute(stateObj.attributes, 'homework') || [];
 
-        if (stateObj) {
-            const currentWeekNumber = getWeekNumber(new Date());
-            const itemTemplates = [];
-            let dayTemplates = [];
-            let daysCount = 0;
+        const currentWeekNumber = getWeekNumber(new Date());
+        const itemTemplates = [];
+        let dayTemplates = [];
+        let daysCount = 0;
 
-            if (homework && homework.length > 0) {
-                let latestHomeworkDay = this.getFormattedDate(homework[0].date);
-                for (let index = 0; index < homework.length; index++) {
-                    let hw = homework[index];
-                    let currentFormattedDate = this.getFormattedDate(hw.date);
+        if (homework && homework.length > 0) {
+            let previousDay = this.getFormattedDate(homework[0].date);
+            for (let index = 0; index < homework.length; index++) {
+                let hw = homework[index];
+                let currentFormattedDate = this.getFormattedDate(hw.date);
 
-                    if (hw.done === true && this.config.display_done_homework === false) {
-                        continue;
-                    }
-
-                    // if homework for a new day
-                    if (latestHomeworkDay !== currentFormattedDate) {
-                        // if previous day has lessons
-                        if (dayTemplates.length > 0) {
-                            itemTemplates.push(this.getDayRow(homework[index-1], dayTemplates, daysCount));
-                            dayTemplates = [];
-                        }
-
-                        latestHomeworkDay = currentFormattedDate;
-                        daysCount++;
-                    }
-
-                    if (this.config.current_week_only && getWeekNumber(new Date(hw.date)) !== currentWeekNumber) {
-                        break;
-                    }
-
-                    dayTemplates.push(this.getHomeworkRow(hw, index));
+                if (hw.done === true && this.config.display_done_homework === false) {
+                    continue;
                 }
 
-                // if there are homework for the day and not limit on the current week or limit and current week
-                if (dayTemplates.length > 0 && (
-                    !this.config.current_week_only
-                    || (this.config.current_week_only && currentWeekNumber === getWeekNumber(new Date(homework[homework.length-1].date)))
-                )) {
-                    itemTemplates.push(this.getDayRow(homework[homework.length-1], dayTemplates, daysCount));
+                if (previousDay !== currentFormattedDate) {
+                    if (dayTemplates.length > 0) {
+                        itemTemplates.push(this.getDayRow(homework[index-1], dayTemplates, daysCount));
+                        dayTemplates = [];
+                    }
+
+                    previousDay = currentFormattedDate;
+                    daysCount++;
                 }
+
+                if (this.config.current_week_only && getWeekNumber(new Date(hw.date)) !== currentWeekNumber) {
+                    break;
+                }
+
+                dayTemplates.push(this.getHomeworkRow(hw, index));
             }
 
-            if (itemTemplates.length === 0) {
-                itemTemplates.push(this.noDataMessage());
+            if (dayTemplates.length > 0 && (
+                !this.config.current_week_only
+                || (this.config.current_week_only && currentWeekNumber === getWeekNumber(new Date(homework[homework.length-1].date)))
+            )) {
+                itemTemplates.push(this.getDayRow(homework[homework.length-1], dayTemplates, daysCount));
             }
-
-            return html`
-                <ha-card id="${this.config.entity}-card" class="${this.config.enable_slider ? 'pronote-homework-card-slider' : ''}">
-                    ${this.config.display_header ? this.getCardHeader() : ''}
-                    ${itemTemplates}
-                </ha-card>`
-            ;
         }
+
+        if (itemTemplates.length === 0) {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
     }
 
-    setConfig(config) {
-        if (!config.entity) {
-            throw new Error('You need to define an entity');
-        }
+    getCardClasses() {
+        return this.config.enable_slider ? 'pronote-homework-card-slider' : '';
+    }
 
-        const defaultConfig = {
-            entity: null,
-            display_header: true,
+    getDefaultConfig() {
+        return {
+            ...super.getDefaultConfig(),
             current_week_only: true,
             reduce_done_homework: true,
             display_done_homework: true,
             enable_slider: false,
-        }
-
-        this.config = {
-            ...defaultConfig,
-            ...config
         };
-
-        this.header_title = 'Devoirs de ';
-        this.no_data_message = 'Pas de devoirs à faire';
     }
 
     static get styles() {

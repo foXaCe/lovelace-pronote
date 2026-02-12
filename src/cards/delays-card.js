@@ -1,21 +1,16 @@
+import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
 
 const getCardName = () => localize("cards.delays.name");
 const getCardDescription = () => localize("cards.delays.description");
 
 class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
 
-    header_title = 'Retards de '
-    no_data_message = 'Aucun retard'
-    period_sensor_key = 'delays'
-    items_attribute_key = 'delays'
+    cardType = 'delays';
+    header_title = 'Retards de ';
+    no_data_message = 'Aucun retard';
+    items_attribute_key = 'delays';
 
     // Génère une ligne pour un retard donné
     getDelaysRow(delay) {
@@ -36,7 +31,7 @@ class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
                 <td>
                     <span class="delay-from">${date}</span>
                     <br>
-                    <span class="delay-hours">${delay.minutes} minutes de retard</span>
+                    <span class="delay-hours">${delay.minutes} ${this.localize('content.minutes_late', 'minutes de retard')}</span>
                 </td>
                 <td>
                     <span class="delay-reason">${delay.reasons}</span>
@@ -44,7 +39,7 @@ class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
             </tr>
         `;
 
-        return html`${rowContent}`;
+        return rowContent;
     }
 
     // Formate la date d'un retard
@@ -62,37 +57,26 @@ class PronoteDelaysCard extends BasePeriodRelatedPronoteCard {
 
     // Génère le rendu de la carte
     getCardContent() {
-        const stateObj = this.hass.states[this.config.entity];
+        const delays = this.getFilteredItems();
+        const itemTemplates = [
+            this.getPeriodSwitcher()
+        ];
+        const delayRows = [];
 
-        if (stateObj) {
-
-            const delays = this.getFilteredItems();
-            const itemTemplates = [
-                this.getPeriodSwitcher()
-            ];
-            let dayTemplates = [];
-            let delaysCount = 0;
-
-            // Génère les lignes pour chaque retard, en respectant la limite maximale si définie
-            for (let index = 0; index < delays.length; index++) {
-                delaysCount++;
-
-                if (this.config.max_delays && this.config.max_delays < delaysCount) {
-                    break;
-                }
-
-                const currentDelay = delays[index];
-                dayTemplates.push(this.getDelaysRow(currentDelay));
+        for (let index = 0; index < delays.length; index++) {
+            if (this.config.max_delays && this.config.max_delays <= index) {
+                break;
             }
-
-            if (dayTemplates.length > 0) {
-                itemTemplates.push(html`<table>${dayTemplates}</table>`);
-            } else {
-                itemTemplates.push(this.noDataMessage());
-            }
-
-            return itemTemplates;
+            delayRows.push(this.getDelaysRow(delays[index]));
         }
+
+        if (delayRows.length > 0) {
+            itemTemplates.push(html`<table>${delayRows}</table>`);
+        } else {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
     }
 
     getDefaultConfig() {

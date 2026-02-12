@@ -1,21 +1,16 @@
+import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
 
 const getCardName = () => localize("cards.absences.name");
 const getCardDescription = () => localize("cards.absences.description");
 
 class PronoteAbsencesCard extends BasePeriodRelatedPronoteCard {
 
-    period_sensor_key = 'absences'
-    items_attribute_key = 'absences'
-    header_title = 'Absences de '
-    no_data_message = 'Aucune absence'
+    cardType = 'absences';
+    items_attribute_key = 'absences';
+    header_title = 'Absences de ';
+    no_data_message = 'Aucune absence';
 
     getAbsencesRow(absence) {
         let from = this.getFormattedDate(absence.from);
@@ -26,14 +21,14 @@ class PronoteAbsencesCard extends BasePeriodRelatedPronoteCard {
                 <span>${absence.justified ? html`<ha-icon icon="mdi:check"></ha-icon>` : html`<ha-icon icon="mdi:clock-alert-outline"></ha-icon>`}</span>
             </td>
             <td><span style="background-color:${absence.justified ? '#107c41' : '#e73a1f'}"></span></td>
-            <td><span class="absence-from">${from} au ${to}</span><br><span class="absence-hours">${absence.hours} de cours manquées</span>
+            <td><span class="absence-from">${from} ${this.localize('content.date_range_to', 'au')} ${to}</span><br><span class="absence-hours">${absence.hours} ${this.localize('content.hours_missed', 'de cours manquées')}</span>
         </td>
             <td>
                 <span class="absence-reason">${absence.reason}</span>
             </td>
         </tr>
-        `
-        return html`${content}`;
+        `;
+        return content;
     }
 
     getFormattedDate(date) {
@@ -41,32 +36,26 @@ class PronoteAbsencesCard extends BasePeriodRelatedPronoteCard {
     }
 
     getCardContent() {
-        const stateObj = this.hass.states[this.config.entity];
+        const absences = this.getFilteredItems();
+        const itemTemplates = [
+            this.getPeriodSwitcher()
+        ];
+        const absenceRows = [];
 
-        if (stateObj) {
-            const absences = this.getFilteredItems();
-            const itemTemplates = [
-                this.getPeriodSwitcher()
-            ];
-            let dayTemplates = [];
-            let absencesCount = 0;
-            for (let index = 0; index < absences.length; index++) {
-                absencesCount++;
-                if (this.config.max_absences && this.config.max_absences < absencesCount) {
-                    break;
-                }
-                let absence = absences[index];
-                dayTemplates.push(this.getAbsencesRow(absence));
+        for (let index = 0; index < absences.length; index++) {
+            if (this.config.max_absences && this.config.max_absences <= index) {
+                break;
             }
-
-            if (absencesCount > 0) {
-                itemTemplates.push(html`<table>${dayTemplates}</table>`);
-            } else {
-                itemTemplates.push(this.noDataMessage());
-            }
-
-            return itemTemplates;
+            absenceRows.push(this.getAbsencesRow(absences[index]));
         }
+
+        if (absenceRows.length > 0) {
+            itemTemplates.push(html`<table>${absenceRows}</table>`);
+        } else {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
     }
 
     getDefaultConfig() {

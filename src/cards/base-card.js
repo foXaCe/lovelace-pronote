@@ -1,8 +1,6 @@
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+import { LitElement, html, css } from "../lit-helpers.js";
+import { createLocalizeFunction } from "../localize.js";
+import { getAttribute } from "../attribute-resolver.js";
 
 class BasePronoteCard extends LitElement {
 
@@ -15,18 +13,73 @@ class BasePronoteCard extends LitElement {
         };
     }
 
+    // Get localize function with current hass language
+    localize(key, fallback) {
+        const localizeFn = createLocalizeFunction(this.hass);
+        return localizeFn(key, fallback);
+    }
+
     getCardHeader() {
         const stateObj = this.hass.states[this.config.entity];
         if (!stateObj) {
             return html``;
         }
         let child_attributes = stateObj.attributes;
-        let child_name = (typeof child_attributes['nickname'] === 'string' && child_attributes['nickname'].length > 0) ? child_attributes['nickname'] : child_attributes['full_name'];
-        return html`<div class="pronote-card-header">${this.header_title} ${child_name}</div>`;
+        let nickname = getAttribute(child_attributes, 'nickname');
+        let full_name = getAttribute(child_attributes, 'full_name');
+        let child_name = (typeof nickname === 'string' && nickname.length > 0) ? nickname : full_name;
+        let title = this.localize(`cards.${this.cardType}.title`, this.header_title);
+        return html`<div class="pronote-card-header">${title} ${child_name}</div>`;
     }
 
     noDataMessage() {
-        return html`<div class="pronote-card-no-data">${this.no_data_message}</div>`;
+        let message = this.localize(`cards.${this.cardType}.no_data`, this.no_data_message);
+        return html`<div class="pronote-card-no-data">${message}</div>`;
+    }
+
+    getCardClasses() {
+        return '';
+    }
+
+    getDefaultConfig() {
+        return {
+            display_header: true,
+        };
+    }
+
+    changeDay(direction, e) {
+        e.preventDefault();
+        if (e.target.classList.contains('disabled')) {
+            return;
+        }
+
+        const prefix = `pronote-${this.cardType}`;
+        const activeDay = e.target.parentElement.parentElement;
+        let hasPreviousDay = activeDay.previousElementSibling && activeDay.previousElementSibling.classList.contains(`${prefix}-day-wrapper`);
+        let hasNextDay = activeDay.nextElementSibling && activeDay.nextElementSibling.classList.contains(`${prefix}-day-wrapper`);
+        let newActiveDay = null;
+
+        if (direction === 'previous' && hasPreviousDay) {
+            newActiveDay = activeDay.previousElementSibling;
+        } else if (direction === 'next' && hasNextDay) {
+            newActiveDay = activeDay.nextElementSibling;
+        }
+
+        if (newActiveDay) {
+            activeDay.classList.remove('active');
+            newActiveDay.classList.add('active');
+
+            hasPreviousDay = newActiveDay.previousElementSibling && newActiveDay.previousElementSibling.classList.contains(`${prefix}-day-wrapper`);
+            hasNextDay = newActiveDay.nextElementSibling && newActiveDay.nextElementSibling.classList.contains(`${prefix}-day-wrapper`);
+
+            if (!hasPreviousDay) {
+                newActiveDay.querySelector(`.${prefix}-header-arrow-left`).classList.add('disabled');
+            }
+
+            if (!hasNextDay) {
+                newActiveDay.querySelector(`.${prefix}-header-arrow-right`).classList.add('disabled');
+            }
+        }
     }
 
     render() {
@@ -40,15 +93,22 @@ class BasePronoteCard extends LitElement {
             return html``;
         }
 
+        if (stateObj.state === 'unavailable' || stateObj.state === 'unknown') {
+            return html`
+                <ha-card id="${this.config.entity}-card">
+                    ${this.config.display_header ? this.getCardHeader() : ''}
+                    <div class="pronote-card-no-data">${this.localize('common.unavailable', 'Données non disponibles')}</div>
+                </ha-card>`;
+        }
+
         return html`
-            <ha-card id="${this.config.entity}-card">
+            <ha-card id="${this.config.entity}-card" class="${this.getCardClasses()}">
                 ${this.config.display_header ? this.getCardHeader() : ''}
                 ${this.getCardContent()}
             </ha-card>`
         ;
     }
 
-    // Définit la configuration de la carte
     setConfig(config) {
         if (!config.entity) {
             throw new Error('You need to define an entity');

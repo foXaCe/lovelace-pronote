@@ -1,11 +1,6 @@
+import { html } from "../lit-helpers.js";
 import BasePronoteCardEditor from "./base-editor";
-import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-
-const html = LitElement.prototype.html;
+import { createLocalizeFunction } from "../localize.js";
 
 class PronoteGradesCardEditor extends BasePronoteCardEditor {
     render() {
@@ -13,21 +8,23 @@ class PronoteGradesCardEditor extends BasePronoteCardEditor {
             return html``;
         }
 
+        const localize = createLocalizeFunction(this.hass);
+
         return html`
-            ${this.buildEntityPickerField('Grades entity', 'entity', this._config.entity, 'grades')}
-            ${this.buildSwitchField('Display header', 'display_header', this._config.display_header)}
-            ${this.buildSwitchField('Display date', 'display_date', this._config.display_date)}
-            ${this.buildSwitchField('Display comment', 'display_comment', this._config.display_comment)}
-            ${this.buildSwitchField('Display class average', 'display_class_average', this._config.display_class_average)}
-            ${this.buildSwitchField('Compare with class average', 'compare_with_class_average', this._config.compare_with_class_average)}
-            ${this.buildSelectField(localize('editor.fields.grade_format', 'Grade format', this.hass), 'grade_format', [{value: 'full', label: localize('editor.labels.full', 'Full', this.hass)}, {value: 'short', label: localize('editor.labels.short', 'Short', this.hass)}], this._config.grade_format)}
-            ${this.buildSwitchField('Display coefficient', 'display_coefficient', this._config.display_coefficient)}
-            ${this.buildSwitchField('Display class min', 'display_class_min', this._config.display_class_min)}
-            ${this.buildSwitchField('Display class max', 'display_class_max', this._config.display_class_max)}
-            ${this.buildSwitchField('Display new grade notice', 'display_new_grade_notice', this._config.display_new_grade_notice)}
-            ${this.buildNumberField('Max grades', 'max_grades', this._config.max_grades)}
-            ${this.buildSwitchField('Hide period switch', 'hide_period_switch', this._config.hide_period_switch, false)}
-            ${this.buildDefaultPeriodSelectField('Default period', 'default_period', 'grades', this._config.default_period)}
+            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'grades'), 'entity', this._config.entity, 'grades')}
+            ${this.buildSwitchField(localize('editor.fields.display_header', 'Display header'), 'display_header', this._config.display_header)}
+            ${this.buildSwitchField(localize('editor.fields.display_date', 'Display date'), 'display_date', this._config.display_date)}
+            ${this.buildSwitchField(localize('editor.fields.display_comment', 'Display comment'), 'display_comment', this._config.display_comment)}
+            ${this.buildSwitchField(localize('editor.fields.display_class_average', 'Display class average'), 'display_class_average', this._config.display_class_average)}
+            ${this.buildSwitchField(localize('editor.fields.compare_with_class_average', 'Compare with class average'), 'compare_with_class_average', this._config.compare_with_class_average)}
+            ${this.buildSelectField(localize('editor.fields.grade_format', 'Grade format'), 'grade_format', [{value: 'full', label: localize('editor.labels.full', 'Full')}, {value: 'short', label: localize('editor.labels.short', 'Short')}], this._config.grade_format)}
+            ${this.buildSwitchField(localize('editor.fields.display_coefficient', 'Display coefficient'), 'display_coefficient', this._config.display_coefficient)}
+            ${this.buildSwitchField(localize('editor.fields.display_class_min', 'Display class min'), 'display_class_min', this._config.display_class_min)}
+            ${this.buildSwitchField(localize('editor.fields.display_class_max', 'Display class max'), 'display_class_max', this._config.display_class_max)}
+            ${this.buildSwitchField(localize('editor.fields.display_new_grade_notice', 'Display new grade notice'), 'display_new_grade_notice', this._config.display_new_grade_notice)}
+            ${this.buildNumberField(localize('editor.fields.max_grades', 'Max grades'), 'max_grades', this._config.max_grades)}
+            ${this.buildSwitchField(localize('editor.fields.hide_period_switch', 'Hide period switch'), 'hide_period_switch', this._config.hide_period_switch, false)}
+            ${this.buildDefaultPeriodSelectField(localize('editor.fields.default_period', 'Default period'), 'default_period', this._config.default_period)}
         `;
     }
 }

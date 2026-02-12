@@ -1,22 +1,17 @@
+import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+import { isSameDay } from "../utils.js";
 
 const getCardName = () => localize("cards.grades.name");
 const getCardDescription = () => localize("cards.grades.description");
 
 class PronoteGradesCard extends BasePeriodRelatedPronoteCard {
 
-    header_title = 'Notes de '
-    no_data_message = 'Aucune note disponible'
-    period_sensor_key = 'grades'
-    items_attribute_key = 'grades'
+    cardType = 'grades';
+    header_title = 'Notes de ';
+    no_data_message = 'Aucune note disponible';
+    items_attribute_key = 'grades';
 
     getFormattedDate(date) {
         return (new Date(date))
@@ -44,16 +39,8 @@ class PronoteGradesCard extends BasePeriodRelatedPronoteCard {
             formatted_grade = gradeData.grade;
         }
 
-        if (this.config.display_new_grade_notice) {
-            let grade_date = new Date(gradeData.date);
-            let today = new Date();
-            if (
-                grade_date.getFullYear() === today.getFullYear()
-                && grade_date.getMonth() === today.getMonth()
-                && grade_date.getDate() === today.getDate()
-            ) {
-                grade_classes.push('new-grade');
-            }
+        if (this.config.display_new_grade_notice && isSameDay(new Date(gradeData.date), new Date())) {
+            grade_classes.push('new-grade');
         }
 
         return html`
@@ -63,47 +50,37 @@ class PronoteGradesCard extends BasePeriodRelatedPronoteCard {
                 <span class="grade-subject">${gradeData.subject}</span>
                 ${this.config.display_comment ? html`<span class="grade-comment">${gradeData.comment}</span>` : ''}
                 ${this.config.display_date ? html`<span class="grade-date">${this.getFormattedDate(gradeData.date)}</span>`: ''}
-                ${this.config.display_coefficient && gradeData.coefficient ? html`<span class="grade-coefficient">Coef. ${gradeData.coefficient}</span>` : ''}
+                ${this.config.display_coefficient && gradeData.coefficient ? html`<span class="grade-coefficient">${this.localize('content.coefficient', 'Coef.')} ${gradeData.coefficient}</span>` : ''}
             </td>
             <td class="grade-detail">
                 <span class="grade-value">${formatted_grade}</span>
-                ${this.config.display_class_average && gradeData.class_average ? html`<span class="grade-class-average">Moy. ${gradeData.class_average}</span>` : ''}
-                ${this.config.display_class_min && gradeData.min ? html`<span class="grade-class-min">Min. ${gradeData.min}</span>` : ''}
-                ${this.config.display_class_max && gradeData.max ? html`<span class="grade-class-max">Max. ${gradeData.max}</span>` : ''}
+                ${this.config.display_class_average && gradeData.class_average ? html`<span class="grade-class-average">${this.localize('content.class_average', 'Moy.')} ${gradeData.class_average}</span>` : ''}
+                ${this.config.display_class_min && gradeData.min ? html`<span class="grade-class-min">${this.localize('content.class_min', 'Min.')} ${gradeData.min}</span>` : ''}
+                ${this.config.display_class_max && gradeData.max ? html`<span class="grade-class-max">${this.localize('content.class_max', 'Max.')} ${gradeData.max}</span>` : ''}
             </td>
         </tr>
         `;
     }
 
     getCardContent() {
-        const stateObj = this.hass.states[this.config.entity];
         const grades = this.getFilteredItems();
-        const max_grades = this.config.max_grades ?? grades.length;
+        const maxGrades = this.config.max_grades ?? grades.length;
+        const gradesRows = [];
+        const itemTemplates = [
+            this.getPeriodSwitcher()
+        ];
 
-        if (stateObj) {
-
-            const gradesRows = [];
-            const itemTemplates = [
-                this.getPeriodSwitcher()
-            ];
-
-
-            for (let index = 0; index < max_grades; index++) {
-                if (index >= grades.length) {
-                    break;
-                }
-                let grade = grades[index];
-                gradesRows.push(this.getGradeRow(grade));
-            }
-
-            if (gradesRows.length > 0) {
-                itemTemplates.push(html`<table>${gradesRows}</table>`);
-            } else {
-                itemTemplates.push(this.noDataMessage());
-            }
-
-            return itemTemplates;
+        for (let index = 0; index < maxGrades && index < grades.length; index++) {
+            gradesRows.push(this.getGradeRow(grades[index]));
         }
+
+        if (gradesRows.length > 0) {
+            itemTemplates.push(html`<table>${gradesRows}</table>`);
+        } else {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
     }
 
     getDefaultConfig() {

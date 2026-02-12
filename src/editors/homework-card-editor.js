@@ -1,10 +1,6 @@
+import { html } from "../lit-helpers.js";
 import BasePronoteCardEditor from "./base-editor";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-
-const html = LitElement.prototype.html;
+import { createLocalizeFunction } from "../localize.js";
 
 class PronoteHomeworkCardEditor extends BasePronoteCardEditor {
     render() {
@@ -12,13 +8,15 @@ class PronoteHomeworkCardEditor extends BasePronoteCardEditor {
             return html``;
         }
 
+        const localize = createLocalizeFunction(this.hass);
+
         return html`
-            ${this.buildEntityPickerField('Homework entity', 'entity', this._config.entity, 'homework')}
-            ${this.buildSwitchField('Display header', 'display_header', this._config.display_header)}
-            ${this.buildSwitchField('Current week only', 'current_week_only', this._config.current_week_only)}
-            ${this.buildSwitchField('Reduce done homework', 'reduce_done_homework', this._config.reduce_done_homework)}
-            ${this.buildSwitchField('Display done homework', 'display_done_homework', this._config.display_done_homework)}
-            ${this.buildSwitchField('Enable slider', 'enable_slider', this._config.enable_slider, false)}
+            ${this.buildEntityPickerField(localize('editor.fields.entity', 'Entity').replace('{card}', 'homework'), 'entity', this._config.entity, 'homework')}
+            ${this.buildSwitchField(localize('editor.fields.display_header', 'Display header'), 'display_header', this._config.display_header)}
+            ${this.buildSwitchField(localize('editor.fields.current_week_only', 'Current week only'), 'current_week_only', this._config.current_week_only)}
+            ${this.buildSwitchField(localize('editor.fields.reduce_done_homework', 'Reduce done homework'), 'reduce_done_homework', this._config.reduce_done_homework)}
+            ${this.buildSwitchField(localize('editor.fields.display_done_homework', 'Display done homework'), 'display_done_homework', this._config.display_done_homework)}
+            ${this.buildSwitchField(localize('editor.fields.enable_slider', 'Enable slider'), 'enable_slider', this._config.enable_slider, false)}
         `;
     }
 }

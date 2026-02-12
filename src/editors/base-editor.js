@@ -1,10 +1,6 @@
-import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+import { LitElement, html, css } from "../lit-helpers.js";
+import { createLocalizeFunction } from "../localize.js";
+import { buildRelatedEntityId, getAttribute } from "../attribute-resolver.js";
 
 class BasePronoteCardEditor extends LitElement {
     static get properties() {
@@ -39,10 +35,9 @@ class BasePronoteCardEditor extends LitElement {
     }
 
     buildSelectField(label, config_key, options, value, default_value) {
-        let selectOptions = [];
-        for (let i = 0; i < options.length; i++) {
-            let currentOption = options[i];
-            selectOptions.push(html`<ha-list-item .value="${currentOption.value}">${currentOption.label}</ha-list-item>`);
+        const selectOptions = [];
+        for (const option of options) {
+            selectOptions.push(html`<ha-list-item .value="${option.value}">${option.label}</ha-list-item>`);
         }
 
         return html`
@@ -58,18 +53,23 @@ class BasePronoteCardEditor extends LitElement {
         `
     }
 
-    buildDefaultPeriodSelectField(label, config_key, period_sensor_key, value, default_value = 'current', allow_all_periods = true) {
+    buildDefaultPeriodSelectField(label, config_key, value, default_value = 'current', allow_all_periods = true) {
         if (!this._config.entity) {
             return html``;
         }
-        let sensor_prefix = this._config.entity.split('_'+period_sensor_key)[0];
-        let active_periods = this.hass.states[`${sensor_prefix}_active_periods`].attributes['periods'];
+        const sensorEntityId = buildRelatedEntityId(this._config.entity, 'active_periods');
+        const sensor = this.hass.states[sensorEntityId];
+        if (!sensor) {
+            return html``;
+        }
+        let active_periods = getAttribute(sensor.attributes, 'periods') || [];
 
+        const localize = createLocalizeFunction(this.hass);
         let options = [];
         if (allow_all_periods) {
-            options.push({value:'all', label: localize('editor.labels.all', 'All', this.hass)});
+            options.push({value:'all', label: localize('editor.labels.all', 'All')});
         }
-        options.push({value:'current', label: localize('editor.labels.current', 'Current', this.hass)});
+        options.push({value:'current', label: localize('editor.labels.current', 'Current')});
         for (let period of active_periods) {
             options.push({value: period.id, label: period.name});
         }

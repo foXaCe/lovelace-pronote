@@ -1,30 +1,17 @@
-import BasePronoteCard from "./base-card"
+import { html, css } from "../lit-helpers.js";
+import BasePronoteCard from "./base-card";
 import { localize } from "../localize.js";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+import { getAttribute } from "../attribute-resolver.js";
+import { getWeekNumber, isSameDay } from "../utils.js";
 
 const getCardName = () => localize("cards.timetable.name");
 const getCardDescription = () => localize("cards.timetable.description");
 
-function getWeekNumber(date) {
-    var d = new Date(+date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    return Math.ceil((((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7) + 1) / 7);
-}
-
-function isSameDay(d1, d2) {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-}
-
 class PronoteTimetableCard extends BasePronoteCard {
 
+    cardType = 'timetable';
+    header_title = 'Emploi du temps de ';
+    no_data_message = 'Pas d\'emploi du temps à afficher';
     lunchBreakRendered = false;
 
     getBreakRow(label, ended) {
@@ -45,7 +32,7 @@ class PronoteTimetableCard extends BasePronoteCard {
 
         let prefix = html``;
         if (this.config.display_lunch_break && lesson.is_afternoon && !this.lunchBreakRendered) {
-            prefix = this.getBreakRow('Repas', this.config.dim_ended_lessons && startAt < currentDate);
+            prefix = this.getBreakRow(this.localize('content.lunch_break', 'Repas'), this.config.dim_ended_lessons && startAt < currentDate);
             this.lunchBreakRendered = true;
         }
 
@@ -59,7 +46,7 @@ class PronoteTimetableCard extends BasePronoteCard {
             <td>
                 <span class="lesson-name">${lesson.lesson}</span>
                 ${this.config.display_classroom ? html`<span class="lesson-classroom">
-                    ${lesson.classroom ? 'Salle '+lesson.classroom : ''}
+                    ${lesson.classroom ? this.localize('content.classroom', 'Salle') + ' ' + lesson.classroom : ''}
                     ${lesson.classroom && this.config.display_teacher ? ', ' : '' }
                 </span>` : '' }
                 ${this.config.display_teacher ? html`<span class="lesson-teacher">
@@ -102,150 +89,103 @@ class PronoteTimetableCard extends BasePronoteCard {
         </div>`;
     }
 
-    changeDay(direction, e) {
-        e.preventDefault();
-        if (e.target.classList.contains('disabled')) {
-            return;
-        }
-
-        const activeDay = e.target.parentElement.parentElement;
-        let hasPreviousDay = activeDay.previousElementSibling && activeDay.previousElementSibling.classList.contains('pronote-timetable-day-wrapper');
-        let hasNextDay = activeDay.nextElementSibling && activeDay.nextElementSibling.classList.contains('pronote-timetable-day-wrapper');
-        let newActiveDay = null;
-
-        if (direction === 'previous' && hasPreviousDay) {
-            newActiveDay = activeDay.previousElementSibling;
-        } else if (direction === 'next' && hasNextDay) {
-            newActiveDay = activeDay.nextElementSibling;
-        }
-
-        if (newActiveDay) {
-            activeDay.classList.remove('active');
-            newActiveDay.classList.add('active');
-
-            hasPreviousDay = newActiveDay.previousElementSibling && newActiveDay.previousElementSibling.classList.contains('pronote-timetable-day-wrapper');
-            hasNextDay = newActiveDay.nextElementSibling && newActiveDay.nextElementSibling.classList.contains('pronote-timetable-day-wrapper');
-
-            if (!hasPreviousDay) {
-                newActiveDay.querySelector('.pronote-timetable-header-arrow-left').classList.add('disabled');
-            }
-
-            if (!hasNextDay) {
-                newActiveDay.querySelector('.pronote-timetable-header-arrow-right').classList.add('disabled');
-            }
-        }
-    }
-
-    // we override the render method to return the card content
-    render() {
-        if (!this.config || !this.hass) {
-            return html``;
-        }
-
+    getCardContent() {
         const stateObj = this.hass.states[this.config.entity];
-
-        if (!stateObj) {
-            return html``;
-        }
-
-        const lessons = stateObj.attributes['lessons'] || [];
+        const lessons = getAttribute(stateObj.attributes, 'lessons') || [];
 
         this.lunchBreakRendered = false;
-            const currentWeekNumber = getWeekNumber(new Date());
+        const currentWeekNumber = getWeekNumber(new Date());
 
-            const itemTemplates = [];
-            let dayTemplates = [];
-            let daysCount = 0;
+        const itemTemplates = [];
+        let dayTemplates = [];
+        let daysCount = 0;
 
-            let dayStartAt = null;
-            let dayEndAt = null;
+        let dayStartAt = null;
+        let dayEndAt = null;
 
-            let now = new Date();
-            let activeDay = 0;
+        let now = new Date();
+        let activeDay = 0;
 
-            for (let index = 0; index < lessons.length; index++) {
-                let lesson = lessons[index];
-                let currentFormattedDate = this.getFormattedDate(lesson);
-                let endOfDay = new Date(lesson.end_at);
+        for (let index = 0; index < lessons.length; index++) {
+            let lesson = lessons[index];
+            let currentFormattedDate = this.getFormattedDate(lesson);
+            let endOfDay = new Date(lesson.end_at);
 
-                if (!lesson.canceled) {
-                    if (dayStartAt === null) {
-                        dayStartAt = lesson.start_at;
-                    }
-                    dayEndAt = lesson.end_at;
+            if (!lesson.canceled) {
+                if (dayStartAt === null) {
+                    dayStartAt = lesson.start_at;
                 }
+                dayEndAt = lesson.end_at;
+            }
 
-                if (lesson.canceled && index < lessons.length - 1) {
-                    let nextLesson = lessons[index + 1];
-                    if (lesson.start_at === nextLesson.start_at && !nextLesson.canceled) {
-                        continue;
-                    }
-                }
-
-                if (this.config.current_week_only) {
-                    if (getWeekNumber(new Date(lesson.start_at)) > currentWeekNumber) {
-                        break;
-                    }
-                }
-
-                dayTemplates.push(this.getTimetableRow(lesson));
-
-                // checking if next lesson is on another day
-                if (index + 1 >= lessons.length || ((index + 1) < lessons.length && currentFormattedDate !== this.getFormattedDate(lessons[index+1]))) {
-                    if (
-                        this.config.enable_slider && this.config.switch_to_next_day
-                        && isSameDay(endOfDay, now) && endOfDay < now
-                    ) {
-                        activeDay = daysCount + 1;
-                    }
-
-                    itemTemplates.push(html`
-                        <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-timetable-day-wrapper ${daysCount === activeDay ? 'active' : ''}">
-                            ${this.getDayHeader(lesson, dayStartAt, dayEndAt, daysCount)}
-                            <table>${dayTemplates}</table>
-                        </div>
-                    `);
-                    dayTemplates = [];
-
-                    this.lunchBreakRendered = false;
-                    dayStartAt = null;
-                    dayEndAt = null;
-
-                    daysCount++;
-                    if (this.config.max_days && this.config.max_days <= daysCount) {
-                        break;
-                    }
-                } else if (this.config.display_free_time_slots && index + 1 < lessons.length) {
-                    const currentEndAt = new Date(lesson.end_at);
-                    const nextLesson = lessons[index+1];
-                    const nextLessonStartAt = new Date(nextLesson.start_at);
-                    if (lesson.is_morning === nextLesson.is_morning && Math.floor((nextLessonStartAt-currentEndAt) / 1000 / 60) > 30) {
-                        const now = new Date();
-                        dayTemplates.push(this.getBreakRow('Pas de cours', this.config.dim_ended_lessons && nextLessonStartAt < now));
-                    }
+            if (lesson.canceled && index < lessons.length - 1) {
+                let nextLesson = lessons[index + 1];
+                if (lesson.start_at === nextLesson.start_at && !nextLesson.canceled) {
+                    continue;
                 }
             }
 
-            if (dayTemplates.length > 0) {
-                itemTemplates.push(html`<table>${dayTemplates}</table>`);
+            if (this.config.current_week_only) {
+                if (getWeekNumber(new Date(lesson.start_at)) > currentWeekNumber) {
+                    break;
+                }
             }
 
-            return html`
-                <ha-card id="${this.config.entity}-card" class="${this.config.enable_slider ? 'pronote-timetable-card-slider' : ''}">
-                    ${this.config.display_header ? this.getCardHeader() : ''}
-                    ${itemTemplates}
-                </ha-card>`
-            ;
-    }
+            dayTemplates.push(this.getTimetableRow(lesson));
 
-    setConfig(config) {
-        if (!config.entity) {
-            throw new Error('You need to define an entity');
+            if (index + 1 >= lessons.length || ((index + 1) < lessons.length && currentFormattedDate !== this.getFormattedDate(lessons[index+1]))) {
+                if (
+                    this.config.enable_slider && this.config.switch_to_next_day
+                    && isSameDay(endOfDay, now) && endOfDay < now
+                ) {
+                    activeDay = daysCount + 1;
+                }
+
+                itemTemplates.push(html`
+                    <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-timetable-day-wrapper ${daysCount === activeDay ? 'active' : ''}">
+                        ${this.getDayHeader(lesson, dayStartAt, dayEndAt, daysCount)}
+                        <table>${dayTemplates}</table>
+                    </div>
+                `);
+                dayTemplates = [];
+
+                this.lunchBreakRendered = false;
+                dayStartAt = null;
+                dayEndAt = null;
+
+                daysCount++;
+                if (this.config.max_days && this.config.max_days <= daysCount) {
+                    break;
+                }
+            } else if (this.config.display_free_time_slots && index + 1 < lessons.length) {
+                const currentEndAt = new Date(lesson.end_at);
+                const nextLesson = lessons[index+1];
+                const nextLessonStartAt = new Date(nextLesson.start_at);
+                if (lesson.is_morning === nextLesson.is_morning && Math.floor((nextLessonStartAt-currentEndAt) / 1000 / 60) > 30) {
+                    const now = new Date();
+                    dayTemplates.push(this.getBreakRow(this.localize('content.no_class', 'Pas de cours'), this.config.dim_ended_lessons && nextLessonStartAt < now));
+                }
+            }
         }
 
-        const defaultConfig = {
-            entity: null,
-            display_header: true,
+        if (dayTemplates.length > 0) {
+            itemTemplates.push(html`<table>${dayTemplates}</table>`);
+        }
+
+        if (itemTemplates.length === 0) {
+            itemTemplates.push(this.noDataMessage());
+        }
+
+        return itemTemplates;
+    }
+
+    getCardClasses() {
+        return this.config.enable_slider ? 'pronote-timetable-card-slider' : '';
+    }
+
+    getDefaultConfig() {
+        return {
+            ...super.getDefaultConfig(),
             display_lunch_break: true,
             display_classroom: true,
             display_teacher: true,
@@ -256,15 +196,7 @@ class PronoteTimetableCard extends BasePronoteCard {
             enable_slider: false,
             display_free_time_slots: true,
             switch_to_next_day: false,
-        }
-
-        this.config = {
-            ...defaultConfig,
-            ...config
         };
-
-        this.header_title = 'Emploi du temps de ';
-        this.no_data_message = 'Pas d\'emploi du temps à afficher';
     }
 
     static get styles() {

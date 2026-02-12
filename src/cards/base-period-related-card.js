@@ -1,21 +1,16 @@
+import { html, css } from "../lit-helpers.js";
 import BasePronoteCard from "./base-card";
-
-const LitElement = Object.getPrototypeOf(
-    customElements.get("ha-panel-lovelace")
-);
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+import { getAttribute, buildRelatedEntityId } from "../attribute-resolver.js";
 
 class BasePeriodRelatedPronoteCard extends BasePronoteCard {
 
     period_filter = null;
     allow_all_periods = true;
     items_attribute_key = null;
-    period_sensor_key = null;
 
     getPeriodSwitcher() {
         if (this.period_filter === null) {
-            this.setPeriodFilterFromConfig(this.config.default_period);
+            this.setPeriodFilterFromConfig();
         }
 
         if (this.config.hide_period_switch) {
@@ -26,7 +21,7 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
         if (this.allow_all_periods) {
             available_periods.push({
                 id: 'all',
-                name: 'Tout'
+                name: this.localize('content.all_periods', 'Tout')
             });
         }
         let tabs = [];
@@ -71,13 +66,14 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
     }
 
     getActivePeriodsSensor() {
-        let sensor_prefix = this.config.entity.split('_'+this.period_sensor_key)[0];
-        return this.hass.states[`${sensor_prefix}_active_periods`];
+        const entityId = buildRelatedEntityId(this.config.entity, 'active_periods');
+        return this.hass.states[entityId] || null;
     }
 
     getActivePeriods() {
         const sensor = this.getActivePeriodsSensor();
-        return sensor?.attributes?.periods || [];
+        if (!sensor) return [];
+        return getAttribute(sensor.attributes, 'periods') || [];
     }
 
     getAllEntityNames() {
@@ -95,15 +91,23 @@ class BasePeriodRelatedPronoteCard extends BasePronoteCard {
 
     getFilteredItems() {
         if (this.period_filter === 'all' && !this.allow_all_periods) {
-            this.period_filter = this.getActivePeriods()[this.getActivePeriods().length - 1].id;
+            const periods = this.getActivePeriods();
+            if (periods.length > 0) {
+                this.period_filter = periods[periods.length - 1].id;
+            }
         }
 
         let entity_names = this.getAllEntityNames();
         let items = [];
         for (let entity_name of entity_names) {
             let entity_state = this.hass.states[entity_name];
-            if (this.period_filter === 'all' || this.period_filter === entity_state.attributes['period_key']) {
-                items.push(...entity_state.attributes[this.items_attribute_key]);
+            if (!entity_state) continue;
+            const periodKey = getAttribute(entity_state.attributes, 'period_key');
+            if (this.period_filter === 'all' || this.period_filter === periodKey) {
+                const entityItems = getAttribute(entity_state.attributes, this.items_attribute_key);
+                if (Array.isArray(entityItems)) {
+                    items.push(...entityItems);
+                }
             }
         }
         return items;
