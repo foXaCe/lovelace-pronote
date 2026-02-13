@@ -1,8 +1,9 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -10,7 +11,7 @@ concurrency:
 
 jobs:
   release:
-    name: Prepare release
+    name: Build and Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -29,8 +30,9 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload release asset
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/pronote.js
           fail_on_unmatched_files: true
+          generate_release_notes: true
