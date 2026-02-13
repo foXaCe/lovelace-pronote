@@ -1,7 +1,6 @@
 {
   "name": "Pronote Cards",
-  "filename": "dist/pronote.js",
+  "filename": "pronote.js",
   "render_readme": true,
-  "homeassistant": "2023.1.0",
-  "version": "1.1.1"
+  "homeassistant": "2023.1.0"
 }
