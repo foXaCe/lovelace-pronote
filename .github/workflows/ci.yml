@@ -25,13 +25,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Run ESLint
-        run: yarn lint
+        run: npm run lint
 
   build:
     name: Build
@@ -44,13 +43,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Build
-        run: yarn build
+        run: npm run build
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
@@ -70,13 +68,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Run tests
-        run: yarn test
+        run: npm test
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v6
