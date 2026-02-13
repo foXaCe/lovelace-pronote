@@ -3,6 +3,7 @@ import BasePronoteCard from "./base-card";
 import { localize } from "../localize.js";
 import { getAttribute } from "../attribute-resolver.js";
 import { getWeekNumber, isSameDay } from "../utils.js";
+import { VERSION } from "../version.js";
 
 const getCardName = () => localize("cards.menus.name", "Pronote Menus Card");
 const getCardDescription = () => localize("cards.menus.description", "Display the menus from Pronote");
@@ -22,11 +23,11 @@ class PronoteMenusCard extends BasePronoteCard {
             return html`<tr><td colspan="2" class="pronote-menu-empty">${this.localize('content.no_menu_details', 'No menu details available')}</td></tr>`;
         }
         return html`
-            ${menu.first_meal?.length > 0 ? this.getMealRow(menu.first_meal, this.localize('content.starter', 'Starter')) : ''}
-            ${menu.main_meal?.length > 0 ? this.getMealRow(menu.main_meal, this.localize('content.main_course', 'Main course')) : ''}
-            ${menu.side_meal?.length > 0 ? this.getMealRow(menu.side_meal, this.localize('content.side_dish', 'Side dish')) : ''}
-            ${menu.cheese?.length > 0 ? this.getMealRow(menu.cheese, this.localize('content.cheese', 'Cheese')) : ''}
-            ${menu.dessert?.length > 0 ? this.getMealRow(menu.dessert, this.localize('content.dessert', 'Dessert')) : ''}
+            ${menu.first_meal?.length > 0 ? this.getMealRow(menu.first_meal, '🥗 ' + this.localize('content.starter', 'Starter')) : ''}
+            ${menu.main_meal?.length > 0 ? this.getMealRow(menu.main_meal, '🍽️ ' + this.localize('content.main_course', 'Main course')) : ''}
+            ${menu.side_meal?.length > 0 ? this.getMealRow(menu.side_meal, '🥦 ' + this.localize('content.side_dish', 'Side dish')) : ''}
+            ${menu.cheese?.length > 0 ? this.getMealRow(menu.cheese, '🧀 ' + this.localize('content.cheese', 'Cheese')) : ''}
+            ${menu.dessert?.length > 0 ? this.getMealRow(menu.dessert, '🍰 ' + this.localize('content.dessert', 'Dessert')) : ''}
         `;
     }
 
@@ -76,14 +77,16 @@ class PronoteMenusCard extends BasePronoteCard {
     }
 
     getDayHeader(menu, daysCount) {
+        const isFirst = daysCount === 0;
+        const isLast = daysCount === this._totalDays - 1;
         return html`<div class="pronote-menus-header">
             <span
-                class="pronote-menus-header-arrow-left ${daysCount === 0 ? 'disabled' : ''}"
+                class="pronote-menus-header-arrow-left ${isFirst ? 'disabled' : ''}"
                 @click=${(e) => this.changeDay('previous', e)}
             >←</span>
             <span class="pronote-menus-header-date">${this.getFormattedDate(menu)}</span>
             <span
-                class="pronote-menus-header-arrow-right"
+                class="pronote-menus-header-arrow-right ${isLast ? 'disabled' : ''}"
                 @click=${(e) => this.changeDay('next', e)}
             >→</span>
         </div>`;
@@ -99,19 +102,35 @@ class PronoteMenusCard extends BasePronoteCard {
         let daysCount = 0;
 
         let now = new Date();
-        let activeDay = 0;
+        let autoActiveDay = 0;
+
+        // Count total days and compute auto-active day
+        let totalMenus = 0;
+        for (let index = 0; index < menus.length; index++) {
+            let menu = menus[index];
+            if (this.config.current_week_only && getWeekNumber(new Date(menu.date)) > currentWeekNumber) {
+                break;
+            }
+            let lunchPassedAt = new Date(menu.date);
+            lunchPassedAt.setHours(14, 0, 0, 0);
+            if (this.config.switch_to_next_day && isSameDay(lunchPassedAt, now) && lunchPassedAt < now) {
+                autoActiveDay = totalMenus + 1;
+            }
+            totalMenus++;
+            if (this.config.max_days && this.config.max_days <= totalMenus) {
+                break;
+            }
+        }
+
+        this._totalDays = totalMenus;
+        this.setAutoActiveDay(autoActiveDay);
+
+        if (this._activeDayIndex === undefined || this._activeDayIndex >= this._totalDays) {
+            this._activeDayIndex = 0;
+        }
 
         for (let index = 0; index < menus.length; index++) {
             let menu = menus[index];
-            let lunchPassedAt = new Date(menu.date);
-            lunchPassedAt.setHours(14, 0, 0, 0);
-
-            if (
-                this.config.switch_to_next_day
-                && isSameDay(lunchPassedAt, now) && lunchPassedAt < now
-            ) {
-                activeDay = daysCount + 1;
-            }
 
             if (this.config.current_week_only) {
                 if (getWeekNumber(new Date(menu.date)) > currentWeekNumber) {
@@ -120,7 +139,7 @@ class PronoteMenusCard extends BasePronoteCard {
             }
 
             itemTemplates.push(html`
-                <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-menus-day-wrapper ${daysCount === activeDay ? 'active' : ''}">
+                <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-menus-day-wrapper ${daysCount === this._activeDayIndex ? 'active' : ''}">
                     ${this.getDayHeader(menu, daysCount)}
                     ${this.config.display_menu_name ? html`<div class="pronote-menus-name">${menu.name}</div>` : ''}
                     <table>${this.getMenuRow(menu)}</table>
@@ -141,7 +160,7 @@ class PronoteMenusCard extends BasePronoteCard {
     }
 
     getCardClasses() {
-        return 'pronote-menus-card-slider';
+        return this.config.enable_slider ? 'pronote-menus-card-slider' : '';
     }
 
     getDefaultConfig() {
@@ -243,4 +262,5 @@ window.customCards.push({
     name: getCardName(),
     description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#menus",
+    version: VERSION,
 });

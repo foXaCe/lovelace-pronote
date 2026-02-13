@@ -9,9 +9,15 @@ class BasePronoteCard extends LitElement {
             config: {},
             hass: {},
             header_title: { type: String },
-            no_data_message: { type: String }
+            no_data_message: { type: String },
+            _activeDayIndex: { type: Number },
         };
     }
+
+    // Track total days for bounds checking in changeDay
+    _totalDays = 0;
+    // Track whether user has manually navigated (prevents auto-reset)
+    _userNavigated = false;
 
     getLocale() {
         return this.hass?.locale?.language || this.hass?.language || 'fr';
@@ -52,36 +58,18 @@ class BasePronoteCard extends LitElement {
 
     changeDay(direction, e) {
         e.preventDefault();
-        if (e.target.classList.contains('disabled')) {
-            return;
+        if (direction === 'previous' && this._activeDayIndex > 0) {
+            this._activeDayIndex--;
+            this._userNavigated = true;
+        } else if (direction === 'next' && this._activeDayIndex < this._totalDays - 1) {
+            this._activeDayIndex++;
+            this._userNavigated = true;
         }
+    }
 
-        const prefix = `pronote-${this.cardType}`;
-        const activeDay = e.target.parentElement.parentElement;
-        let hasPreviousDay = activeDay.previousElementSibling && activeDay.previousElementSibling.classList.contains(`${prefix}-day-wrapper`);
-        let hasNextDay = activeDay.nextElementSibling && activeDay.nextElementSibling.classList.contains(`${prefix}-day-wrapper`);
-        let newActiveDay = null;
-
-        if (direction === 'previous' && hasPreviousDay) {
-            newActiveDay = activeDay.previousElementSibling;
-        } else if (direction === 'next' && hasNextDay) {
-            newActiveDay = activeDay.nextElementSibling;
-        }
-
-        if (newActiveDay) {
-            activeDay.classList.remove('active');
-            newActiveDay.classList.add('active');
-
-            hasPreviousDay = newActiveDay.previousElementSibling && newActiveDay.previousElementSibling.classList.contains(`${prefix}-day-wrapper`);
-            hasNextDay = newActiveDay.nextElementSibling && newActiveDay.nextElementSibling.classList.contains(`${prefix}-day-wrapper`);
-
-            if (!hasPreviousDay) {
-                newActiveDay.querySelector(`.${prefix}-header-arrow-left`).classList.add('disabled');
-            }
-
-            if (!hasNextDay) {
-                newActiveDay.querySelector(`.${prefix}-header-arrow-right`).classList.add('disabled');
-            }
+    setAutoActiveDay(index) {
+        if (!this._userNavigated) {
+            this._activeDayIndex = index;
         }
     }
 

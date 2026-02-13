@@ -3,6 +3,7 @@ import BasePronoteCard from "./base-card";
 import { localize } from "../localize.js";
 import { getAttribute } from "../attribute-resolver.js";
 import { getWeekNumber, isSameDay } from "../utils.js";
+import { VERSION } from "../version.js";
 
 const getCardName = () => localize("cards.timetable.name");
 const getCardDescription = () => localize("cards.timetable.description");
@@ -73,9 +74,11 @@ class PronoteTimetableCard extends BasePronoteCard {
     }
 
     getDayHeader(firstLesson, dayStartAt, dayEndAt, daysCount) {
+        const isFirst = daysCount === 0;
+        const isLast = daysCount === this._totalDays - 1;
         return html`<div class="pronote-timetable-header">
             ${this.config.enable_slider ? html`<span
-                class="pronote-timetable-header-arrow-left ${daysCount === 0 ? 'disabled' : ''}"
+                class="pronote-timetable-header-arrow-left ${isFirst ? 'disabled' : ''}"
                 @click=${(e) => this.changeDay('previous', e)}
             >←</span>` : '' }
             <span class="pronote-timetable-header-date">${this.getFormattedDate(firstLesson)}</span>
@@ -83,7 +86,7 @@ class PronoteTimetableCard extends BasePronoteCard {
                 ${this.getFormattedTime(dayStartAt)} - ${this.getFormattedTime(dayEndAt)}
             </span>` : '' }
             ${this.config.enable_slider ? html`<span
-                class="pronote-timetable-header-arrow-right"
+                class="pronote-timetable-header-arrow-right ${isLast ? 'disabled' : ''}"
                 @click=${(e) => this.changeDay('next', e)}
             >→</span>` : '' }
         </div>`;
@@ -104,12 +107,49 @@ class PronoteTimetableCard extends BasePronoteCard {
         let dayEndAt = null;
 
         let now = new Date();
-        let activeDay = 0;
+        let autoActiveDay = 0;
+
+        // First pass: count days and compute auto-active day
+        let tempDaysCount = 0;
+        let tempFormattedDate = null;
+        for (let index = 0; index < lessons.length; index++) {
+            let lesson = lessons[index];
+            let currentFormattedDate = this.getFormattedDate(lesson);
+
+            if (this.config.current_week_only && getWeekNumber(new Date(lesson.start_at)) > currentWeekNumber) {
+                break;
+            }
+
+            if (tempFormattedDate !== null && currentFormattedDate !== tempFormattedDate) {
+                if (
+                    this.config.enable_slider && this.config.switch_to_next_day
+                    && isSameDay(new Date(lessons[index - 1].end_at), now) && new Date(lessons[index - 1].end_at) < now
+                ) {
+                    autoActiveDay = tempDaysCount + 1;
+                }
+                tempDaysCount++;
+                if (this.config.max_days && this.config.max_days <= tempDaysCount) {
+                    break;
+                }
+            }
+            tempFormattedDate = currentFormattedDate;
+        }
+        // Count the last day
+        if (tempFormattedDate !== null) {
+            tempDaysCount++;
+        }
+
+        this._totalDays = tempDaysCount;
+        this.setAutoActiveDay(autoActiveDay);
+
+        // Ensure _activeDayIndex is within bounds
+        if (this._activeDayIndex === undefined || this._activeDayIndex >= this._totalDays) {
+            this._activeDayIndex = 0;
+        }
 
         for (let index = 0; index < lessons.length; index++) {
             let lesson = lessons[index];
             let currentFormattedDate = this.getFormattedDate(lesson);
-            let endOfDay = new Date(lesson.end_at);
 
             if (!lesson.canceled) {
                 if (dayStartAt === null) {
@@ -134,15 +174,8 @@ class PronoteTimetableCard extends BasePronoteCard {
             dayTemplates.push(this.getTimetableRow(lesson));
 
             if (index + 1 >= lessons.length || ((index + 1) < lessons.length && currentFormattedDate !== this.getFormattedDate(lessons[index+1]))) {
-                if (
-                    this.config.enable_slider && this.config.switch_to_next_day
-                    && isSameDay(endOfDay, now) && endOfDay < now
-                ) {
-                    activeDay = daysCount + 1;
-                }
-
                 itemTemplates.push(html`
-                    <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-timetable-day-wrapper ${daysCount === activeDay ? 'active' : ''}">
+                    <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-timetable-day-wrapper ${daysCount === this._activeDayIndex ? 'active' : ''}">
                         ${this.getDayHeader(lesson, dayStartAt, dayEndAt, daysCount)}
                         <table>${dayTemplates}</table>
                     </div>
@@ -311,4 +344,5 @@ window.customCards.push({
     name: getCardName(),
     description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#timetable",
+    version: VERSION,
 });
