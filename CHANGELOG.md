@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] - 2026-02-13
+
+### Changed
+
+- Replace semantic-release with tag-based release workflow
+
+### Fixed
+
+- HACS structure validation by correcting filename in hacs.json
+
 ## [1.1.1] - 2026-02-13
 
 ### Fixed
