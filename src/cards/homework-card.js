@@ -3,6 +3,7 @@ import BasePronoteCard from "./base-card";
 import { localize } from "../localize.js";
 import { getAttribute } from "../attribute-resolver.js";
 import { getWeekNumber } from "../utils.js";
+import { VERSION } from "../version.js";
 
 const getCardName = () => localize("cards.homework.name");
 const getCardDescription = () => localize("cards.homework.description");
@@ -255,4 +256,5 @@ window.customCards.push({
     name: getCardName(),
     description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#homework",
+    version: VERSION,
 });

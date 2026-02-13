@@ -1,6 +1,7 @@
 import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
+import { VERSION } from "../version.js";
 
 const getCardName = () => localize("cards.absences.name");
 const getCardDescription = () => localize("cards.absences.description");
@@ -140,4 +141,5 @@ window.customCards.push({
     name: getCardName(),
     description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#absences",
+    version: VERSION,
 });

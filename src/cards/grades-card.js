@@ -2,6 +2,7 @@ import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
 import { isSameDay } from "../utils.js";
+import { VERSION } from "../version.js";
 
 const getCardName = () => localize("cards.grades.name");
 const getCardDescription = () => localize("cards.grades.description");
@@ -212,4 +213,5 @@ window.customCards.push({
     name: getCardName(),
     description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#grades",
+    version: VERSION,
 });

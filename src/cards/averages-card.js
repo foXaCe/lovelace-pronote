@@ -2,6 +2,7 @@ import { html, css } from "../lit-helpers.js";
 import BasePeriodRelatedPronoteCard from './base-period-related-card';
 import { localize } from "../localize.js";
 import { buildRelatedEntityId } from "../attribute-resolver.js";
+import { VERSION } from "../version.js";
 
 const getCardName = () => localize("cards.averages.name");
 const getCardDescription = () => localize("cards.averages.description");
@@ -247,4 +248,5 @@ window.customCards.push({
     name: getCardName(),
     description: getCardDescription(),
     documentationURL: "https://github.com/delphiki/lovelace-pronote?tab=readme-ov-file#averages",
+    version: VERSION,
 });
