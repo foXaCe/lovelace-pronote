@@ -4,7 +4,7 @@
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
-    ["@semantic-release/exec", {"prepareCmd": "yarn build"}],
+    ["@semantic-release/exec", {"prepareCmd": "npm run build"}],
     ["@semantic-release/git", {
       "assets": ["CHANGELOG.md", "package.json", "hacs.json"],
       "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
