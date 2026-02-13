@@ -25,15 +25,15 @@ class PronoteHomeworkCard extends BasePronoteCard {
         return new Intl.DateTimeFormat(this.getLocale(), {hour:"numeric", minute:"numeric"}).format(new Date(time));
     }
 
-    getDayHeader(homework, daysCount) {
+    getDayHeader(date, isFirst, isLast) {
         return html`<div class="pronote-homework-header">
             ${this.config.enable_slider ? html`<span
-                class="pronote-homework-header-arrow-left ${daysCount === 0 ? 'disabled' : ''}"
+                class="pronote-homework-header-arrow-left ${isFirst ? 'disabled' : ''}"
                 @click=${(e) => this.changeDay('previous', e)}
             >←</span>` : '' }
-            <span class="pronote-homework-header-date">${this.getFormattedDate(homework.date)}</span>
+            <span class="pronote-homework-header-date">${this.getFormattedDate(date)}</span>
             ${this.config.enable_slider ? html`<span
-                class="pronote-homework-header-arrow-right"
+                class="pronote-homework-header-arrow-right ${isLast ? 'disabled' : ''}"
                 @click=${(e) => this.changeDay('next', e)}
             >→</span>` : '' }
         </div>`;
@@ -69,10 +69,12 @@ class PronoteHomeworkCard extends BasePronoteCard {
         `;
     }
 
-    getDayRow(homework, dayTemplates, daysCount) {
+    getDayRow(date, dayTemplates, daysCount) {
+        const isFirst = daysCount === 0;
+        const isLast = daysCount === this._totalDays - 1;
         return html`
-        <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-homework-day-wrapper ${daysCount === 0 ? 'active' : ''}">
-            ${this.getDayHeader(homework, daysCount)}
+        <div class="${this.config.enable_slider ? 'slider-enabled' : ''} pronote-homework-day-wrapper ${daysCount === this._activeDayIndex ? 'active' : ''}">
+            ${this.getDayHeader(date, isFirst, isLast)}
             <table class="${this.config.reduce_done_homework ? 'reduce-done' : ''}">${dayTemplates}</table>
         </div>
         `;
@@ -83,42 +85,79 @@ class PronoteHomeworkCard extends BasePronoteCard {
         const homework = getAttribute(stateObj.attributes, 'homework') || [];
 
         const currentWeekNumber = getWeekNumber(new Date());
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         const itemTemplates = [];
         let dayTemplates = [];
         let daysCount = 0;
+        let currentDayDate = null;
+        let previousFormattedDate = null;
+        let autoActiveDay = 0;
 
         if (homework && homework.length > 0) {
-            let previousDay = this.getFormattedDate(homework[0].date);
+            // First pass: count displayed days for slider bounds
+            let tempDays = 0;
+            let tempPrevDate = null;
+            let autoActiveDayFound = false;
+            for (let i = 0; i < homework.length; i++) {
+                let hw = homework[i];
+                if (hw.done === true && this.config.display_done_homework === false) {
+                    continue;
+                }
+                if (this.config.current_week_only && getWeekNumber(new Date(hw.date)) !== currentWeekNumber) {
+                    continue;
+                }
+                let fd = this.getFormattedDate(hw.date);
+                if (tempPrevDate !== null && tempPrevDate !== fd) {
+                    tempDays++;
+                }
+                tempPrevDate = fd;
+                // Auto-advance: find first day >= today
+                if (!autoActiveDayFound) {
+                    let hwDate = new Date(hw.date);
+                    hwDate.setHours(0, 0, 0, 0);
+                    if (hwDate >= today) {
+                        autoActiveDay = tempDays;
+                        autoActiveDayFound = true;
+                    }
+                }
+            }
+            this._totalDays = tempDays + (tempPrevDate !== null ? 1 : 0);
+            this.setAutoActiveDay(autoActiveDay);
+            if (this._activeDayIndex === undefined || this._activeDayIndex >= this._totalDays) {
+                this._activeDayIndex = 0;
+            }
+
+            // Second pass: build templates
             for (let index = 0; index < homework.length; index++) {
                 let hw = homework[index];
-                let currentFormattedDate = this.getFormattedDate(hw.date);
 
                 if (hw.done === true && this.config.display_done_homework === false) {
                     continue;
                 }
 
-                if (previousDay !== currentFormattedDate) {
-                    if (dayTemplates.length > 0) {
-                        itemTemplates.push(this.getDayRow(homework[index-1], dayTemplates, daysCount));
-                        dayTemplates = [];
-                    }
-
-                    previousDay = currentFormattedDate;
-                    daysCount++;
-                }
-
                 if (this.config.current_week_only && getWeekNumber(new Date(hw.date)) !== currentWeekNumber) {
-                    break;
+                    continue;
                 }
 
+                let currentFormattedDate = this.getFormattedDate(hw.date);
+
+                if (previousFormattedDate !== null && previousFormattedDate !== currentFormattedDate) {
+                    itemTemplates.push(this.getDayRow(currentDayDate, dayTemplates, daysCount));
+                    dayTemplates = [];
+                    daysCount++;
+                    currentDayDate = null;
+                }
+
+                if (currentDayDate === null) {
+                    currentDayDate = hw.date;
+                }
+                previousFormattedDate = currentFormattedDate;
                 dayTemplates.push(this.getHomeworkRow(hw, index));
             }
 
-            if (dayTemplates.length > 0 && (
-                !this.config.current_week_only
-                || (this.config.current_week_only && currentWeekNumber === getWeekNumber(new Date(homework[homework.length-1].date)))
-            )) {
-                itemTemplates.push(this.getDayRow(homework[homework.length-1], dayTemplates, daysCount));
+            if (dayTemplates.length > 0) {
+                itemTemplates.push(this.getDayRow(currentDayDate, dayTemplates, daysCount));
             }
         }
 
