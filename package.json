@@ -57,7 +57,7 @@
     "semantic-release": "^25.0.0",
     "ts-lit-plugin": "^2.0.2",
     "typescript": "^5.0.0",
-    "typescript-eslint": "^8.0.0",
+    "typescript-eslint": "^8.67.0",
     "typescript-styled-plugin": "^0.15.0",
     "vitest": "^4.0.18"
   },
