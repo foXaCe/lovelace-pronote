@@ -1,8 +1,8 @@
-import resolve from 'rollup-plugin-node-resolve';
-import typescript from 'rollup-plugin-typescript2';
-import babel from 'rollup-plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
+import babel from '@rollup/plugin-babel';
 import serve from 'rollup-plugin-serve';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import json from '@rollup/plugin-json';
 import ignore from './rollup-plugins/ignore';
 import { ignoreTextfieldFiles } from './elements/ignore/textfield';
@@ -17,10 +17,10 @@ export default {
   },
   plugins: [
     resolve(),
-    typescript(),
+    typescript({ tsconfig: './tsconfig.json', sourceMap: true, inlineSources: true }),
     json(),
     babel({
-      exclude: 'node_modules/**',
+      exclude: 'node_modules/**', extensions: ['.js', '.ts'],
     }),
     terser(),
     serve({
